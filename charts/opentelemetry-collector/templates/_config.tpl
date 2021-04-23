@@ -180,7 +180,7 @@ receivers:
           k8s.pod.uid: 'EXPR($.uid)'
           run_id: 'EXPR($.run_id)'
           stream: 'EXPR($.stream)'
-          k8s.container.name: 'EXPR($.container_name)'
+          container_name: 'EXPR($.container_name)'
           k8s.namespace.name: 'EXPR($.namespace)'
           k8s.pod.name: 'EXPR($.pod_name)'
       # Clean up log record

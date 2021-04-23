@@ -1,0 +1,152 @@
+nameOverride: ""
+fullnameOverride: ""
+
+config:
+  exporters:
+    logging: {}
+  extensions:
+    health_check: {}
+  processors:
+    batch: {}
+    memory_limiter: null
+  receivers:
+  service:
+    extensions:
+      - health_check
+    pipelines:
+      logs:
+        exporters:
+          - logging
+        processors:
+          - memory_limiter
+          - batch
+        receivers:
+          - filelog
+      metrics:
+      traces:
+
+# Shared params for agentCollector daemonset and standaloneCollector deployment pods.
+# Can be overridden here or for any component independently using the same keys.
+
+image:
+  # If you want to use the contrib image `otel/opentelemetry-collector-contrib`, you also need to change `command.name` value to `otelcontribcol`.
+  repository: ""
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+imagePullSecrets: []
+
+# OpenTelemetry Collector executable
+command:
+  name: otelcontribcol
+  extraArgs: []
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podSecurityContext: {}
+securityContext: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+extraEnvs: []
+extraHostPathMounts: []
+secretMounts: []
+
+# Configuration for ports, shared between agentCollector, standaloneCollector and service.
+# Can be overridden here or for agentCollector and standaloneCollector independently.
+ports:
+  otlp:
+    enabled: false
+    containerPort: 4317
+    servicePort: 4317
+    protocol: TCP
+  jaeger-thrift:
+    enabled: false
+    containerPort: 14268
+    servicePort: 14268
+    protocol: TCP
+  jaeger-grpc:
+    enabled: false
+    containerPort: 14250
+    servicePort: 14250
+    protocol: TCP
+  zipkin:
+    enabled: false
+    containerPort: 9411
+    servicePort: 9411
+    protocol: TCP
+
+# Configuration for agent OpenTelemetry Collector daemonset, enabled by default
+agentCollector:
+  enabled: true
+
+  containerLogs:
+    enabled: true
+    # Container runtime. One of `docker`, `cri-o`, or `containerd`
+    containerRunTime: "docker"
+    includeAgentLogs: false
+    enrichK8sMetadata: true
+    listOfAnnotations:
+      - key: splunk.com/index
+      - key: splunk.com/sourcetype
+      - key: splunk.com/exclude
+    listOfLabels:
+      - key: app
+
+    # Exporters for container logs.
+    # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter
+    exporters:
+      splunk_hec:
+        token: ""
+        endpoint: ""
+        source: "otel"
+        sourcetype: "otel"
+        index: ""
+        max_connections: 2000
+        disable_compression: true
+        timeout: 10s
+        insecure_skip_verify: true
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+
+  podAnnotations: {}
+
+  configOverride: {}
+
+standaloneCollector:
+  enabled: false
+
+  replicaCount: 1
+
+  resources:
+    limits:
+      cpu: 1
+      memory: 2Gi
+
+  podAnnotations: {}
+
+  configOverride: {}
+
+service:
+  type: ClusterIP
+  annotations: {}
+
+# autoscaling is used only if standaloneCollector enabled
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
