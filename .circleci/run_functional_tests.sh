@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-pyenv global 3.6.5
+pyenv global 3.9.1
 pip install --upgrade pip
 pip install -r test/requirements.txt
 cd test
