@@ -1,7 +1,10 @@
 name: Release Charts
 
 on:
-  push:
+  workflow_dispatch:
+    name:
+      description: 'Person to greet'
+      required: true
     branches:
       - main
 
