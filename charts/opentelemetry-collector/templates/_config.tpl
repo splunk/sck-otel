@@ -149,6 +149,13 @@ receivers:
           parse_from: time
           layout_type: gotime
           layout: '2006-01-02T15:04:05.000000000-07:00'
+      - type: restructure
+        id: check for empty log
+        ops:
+          - add:
+              if: 'EXPR($.log) != nil'
+              field: log
+              value: ""
       {{- end }}
       {{- if eq .Values.agentCollector.containerLogs.containerRunTime "containerd" }}
       # Parse CRI-Containerd format
