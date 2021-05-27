@@ -22,7 +22,6 @@ jobs:
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
       - name: Install Helm
         uses: azure/setup-helm@v1
         with:
@@ -31,19 +30,16 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.7
-          
+
       - name: Run chart-testing (lint)
         id: lint
         uses: helm/chart-testing-action@v2.0.1
         env:
           CT_CHECK_VERSION_INCREMENT: "true"
-        with:
-          command: lint
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.2.1
         with:
-          charts_repo_url: "https://github.com/splunk/sck-otel"
-          charts_dir: charts
+          charts_repo_url: "https://splunk.github.io/sck-otel"
         env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_TOKEN: "${{ secrets.CR_TOKEN }}"

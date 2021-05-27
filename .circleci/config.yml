@@ -10,18 +10,21 @@ workflows:
               ignore:
                 - /^release\/.*/
                 - main
+                - gh-pages
       - build_test_sck_otel_crio:
           filters:
             branches:
               ignore:
                 - /^release\/.*/
                 - main
+                - gh-pages
       - build_test_sck_otel_containerd:
           filters:
             branches:
               ignore:
                 - /^release\/.*/
                 - main
+                - gh-pages
 jobs:
   build_test_sck_otel_docker:
     resource_class: large
