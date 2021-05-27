@@ -5,6 +5,7 @@ on:
     name:
       description: 'Person to greet'
       required: true
+      default: "rockb1017"
     branches:
       - main
 
@@ -27,10 +28,18 @@ jobs:
         with:
           version: v3.4.1
 
+      - name: Run chart-testing (lint)
+        id: lint
+        uses: helm/chart-testing-action@v2.0.1
+        env:
+          CT_CHECK_VERSION_INCREMENT: "true"
+        with:
+          command: lint
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.2.1
         with:
-          charts_repo_url: "https://github.com/splunk/sck-otel"
+          charts_repo_url: "https://splunk.github.io/sck-otel"
           charts_dir: charts
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
