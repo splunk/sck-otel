@@ -1,5 +1,4 @@
-{{- if eq .Values.agentCollector.enabled true -}}
-{{- if eq .Values.agentCollector.containerLogs.enrichK8sMetadata true -}}
+{{- if eq .Values.containers.enrichK8sMetadata true -}}
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -14,5 +13,4 @@ subjects:
 - kind: ServiceAccount
   name: {{ include "opentelemetry-collector.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
-{{- end -}}
 {{- end -}}
