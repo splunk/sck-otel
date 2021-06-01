@@ -23,13 +23,10 @@ jobs:
         with:
           python-version: 3.7
 
-      - name: Run chart-testing (lint)
-        id: lint
-        uses: helm/chart-testing-action@v2.0.1
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.1.0
         env:
           CT_CHECK_VERSION_INCREMENT: "false"
-        with:
-          command: lint
 
       - name: Run chart-testing (list-changed)
         id: list-changed
@@ -39,11 +36,13 @@ jobs:
             echo "::set-output name=changed::true"
           fi
 
+      - name: Run chart-testing (lint)
+        run: ct lint --all --lint-conf=lintconf.yaml 
+
       - name: Create kind cluster
         uses: helm/kind-action@v1.1.0
         if: steps.list-changed.outputs.changed == 'true'
 
       - name: Run chart-testing (install)
-        uses: helm/chart-testing-action@v2.0.1
-        with:
-          command: install
+        run: ct install --all
+

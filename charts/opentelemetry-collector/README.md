@@ -9,10 +9,10 @@ in kubernetes cluster.
 
 ## Installing the Chart
 
-Add OpenTelemetry Helm repository:
+Add this Helm repository:
 
 ```console
-helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm repo add open-telemetry https://splunk.github.io/sck-otel
 ```
 
 To install the chart with the release name my-opentelemetry-collector, run the following command:

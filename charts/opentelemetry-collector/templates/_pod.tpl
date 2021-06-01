@@ -26,7 +26,7 @@ containers:
       - name: {{ $key }}
         containerPort: {{ $port.containerPort }}
         protocol: {{ $port.protocol }}
-        {{- if and $.isAgent $port.hostPort }}
+        {{- if $port.hostPort }}
         hostPort: {{ $port.hostPort }}
         {{- end }}
       {{- end }}
@@ -74,7 +74,7 @@ containers:
         subPath: {{ .subPath }}
         {{- end }}
       {{- end }}
-      {{- if and $.isAgent .Values.agentCollector.containerLogs.enabled }}
+      {{- if .Values.containers.enabled }}
       - name: varlogpods
         mountPath: /var/log/pods
         readOnly: true
@@ -82,10 +82,12 @@ containers:
         mountPath: /var/lib/docker/containers
         readOnly: true
       {{- end }}
+      - name: checkpoint
+        mountPath: /var/log/pods/otel_pos
 volumes:
   - name: {{ .Chart.Name }}-configmap
     configMap:
-      name: {{ include "opentelemetry-collector.fullname" . }}{{ .configmapSuffix }}
+      name: {{ include "opentelemetry-collector.fullname" . }}
       items:
         - key: relay
           path: relay.yaml
@@ -99,7 +101,7 @@ volumes:
     secret:
       secretName: {{ .secretName }}
   {{- end }}
-  {{- if and $.isAgent .Values.agentCollector.containerLogs.enabled }}
+  {{- if .Values.containers.enabled }}
   - name: varlogpods
     hostPath:
       path: /var/log/pods
@@ -107,6 +109,10 @@ volumes:
     hostPath:
       path: /var/lib/docker/containers
   {{- end }}
+  - name: checkpoint
+    hostPath: 
+      path: /var/log/pods/otel_pos
+      type: DirectoryOrCreate
 {{- with .Values.nodeSelector }}
 nodeSelector:
   {{- toYaml . | nindent 2 }}

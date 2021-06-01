@@ -8,9 +8,9 @@ fullnameOverride: ""
 # Splunk HEC configuration
 splunk_hec:
   # Required. URL to a Splunk instance to send data to. ie) "http://X.X.X.X:8088/services/collector"
-  endpoint:
+  endpoint: https://0.0.0.0:8088/services/collector
   # Required. Splunk HTTP Event Collector token.
-  token:
+  token: "00000000-0000-0000-0000-000000000000"
   # Optional. Name of the Splunk index targeted.
   index:
   # Maximum HTTP connections to use simultaneously when sending data. Defaults to 200.
@@ -41,7 +41,7 @@ checkpointPath: "/var/log/pods/otel_pos"
 containers:
   enabled: true
   # Container runtime. One of `docker`, `cri-o`, or `containerd`
-  containerRuntime: docker
+  containerRuntime: cri-o
   # Path of container log files, default /var/log/pods/*/*/*.log
   # The file format is /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<run_id>.log
   path: /var/log/pods/*/*/*.log

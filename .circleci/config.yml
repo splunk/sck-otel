@@ -98,7 +98,7 @@ commands:
             sudo mv minikube /usr/local/bin/
             sudo sysctl fs.protected_regular=0
             # Start Minikube and Wait
-            minikube start --driver=docker --container-runtime=<< parameters.container_runtime >> --cpus 2 --memory 4098 --kubernetes-version=${KUBERNETES_VERSION} --no-vtx-check
+            minikube start --driver=docker --container-runtime=<< parameters.container_runtime >> --cpus 3 --memory 8192 --kubernetes-version=${KUBERNETES_VERSION} --no-vtx-check
             kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml
             export JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'
             until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do
@@ -168,4 +168,7 @@ executors:
       CI_HEC_PROTOCOL: http
       CI_INDEX_EVENTS: circleci_events
       CRICTL_VERSION: v1.21.0
+      # OTEL_CONTRIB_IMAGE = Set from CircleCI project env var
+      # OTEL_CONTRIB_IMAGE_TAG = Set from CircleCI project env var
+      # CI_DATAGEN_IMAGE = Set from CircleCI project env var
 

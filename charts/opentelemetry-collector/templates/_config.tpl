@@ -15,37 +15,15 @@ spike_limit_mib: {{ include "opentelemetry-collector.getMemSpikeLimitMib" .Value
 ballast_size_mib: {{ include "opentelemetry-collector.getMemBallastSizeMib" .Values.resources.limits.memory }}
 {{- end }}
 
-{{/*
-Merge user supplied top-level (not particular to standalone or agent) config into memory limiter config.
-*/}}
-{{- define "opentelemetry-collector.baseConfig" -}}
-{{- $processorsConfig := get .Values.config "processors" }}
-{{- if not $processorsConfig.memory_limiter }}
-{{- $_ := set $processorsConfig "memory_limiter" (include "opentelemetry-collector.memoryLimiter" . | fromYaml) }}
-{{- end }}
-{{- .Values.config | toYaml }}
-{{- end }}
 
 {{/*
 Build config file for agent OpenTelemetry Collector
 */}}
 {{- define "opentelemetry-collector.agentCollectorConfig" -}}
-{{- $values := deepCopy .Values.agentCollector | mustMergeOverwrite (deepCopy .Values)  }}
+{{- $values := deepCopy .Values | mustMergeOverwrite (deepCopy .Values)  }}
 {{- $data := dict "Values" $values | mustMergeOverwrite (deepCopy .) }}
-{{- $config := include "opentelemetry-collector.baseConfig" $data | fromYaml }}
-{{- $config := include "opentelemetry-collector.agent.containerLogsConfig" $data | fromYaml | mustMergeOverwrite $config }}
-{{- $config := include "opentelemetry-collector.agentConfigOverride" $data | fromYaml | mustMergeOverwrite $config }}
-{{- .Values.agentCollector.configOverride | mustMergeOverwrite $config | toYaml }}
-{{- end }}
-
-{{/*
-Build config file for standalone OpenTelemetry Collector
-*/}}
-{{- define "opentelemetry-collector.standaloneCollectorConfig" -}}
-{{- $values := deepCopy .Values.standaloneCollector | mustMergeOverwrite (deepCopy .Values)  }}
-{{- $data := dict "Values" $values | mustMergeOverwrite (deepCopy .) }}
-{{- $config := include "opentelemetry-collector.baseConfig" $data | fromYaml }}
-{{- .Values.standaloneCollector.configOverride | mustMergeOverwrite $config | toYaml }}
+{{- $config := include "opentelemetry-collector.agent.containerLogsConfig" $data | fromYaml }}
+{{- .Values.configOverride | mustMergeOverwrite $config | toYaml }}
 {{- end }}
 
 {{/*
@@ -103,52 +81,48 @@ Get otel memory_limiter ballast_size_mib value based on 40% of resources.memory.
 {{- div (mul (include "opentelemetry-collector.convertMemToMib" .) 40) 100 }}
 {{- end -}}
 
-{{/*
-Default config override for agent collector deamonset
-*/}}
-{{- define "opentelemetry-collector.agentConfigOverride" -}}
-{{- if .Values.standaloneCollector.enabled }}
-exporters:
-  otlp:
-    endpoint: {{ include "opentelemetry-collector.fullname" . }}:4317
-    insecure: true
-{{- end }}
-
-{{- if .Values.standaloneCollector.enabled }}
-service:
-  pipelines:
-    logs:
-      exporters: [otlp]
-    metrics:
-      exporters: [otlp]
-    traces:
-      exporters: [otlp]
-{{- end }}
-{{- end }}
-
 {{- define "opentelemetry-collector.agent.containerLogsConfig" -}}
-{{- if .Values.agentCollector.containerLogs.enabled }}
+extensions:
+  health_check: {}
+  file_storage: 
+    {{- with .Values.checkpointPath }}
+    directory: {{ . }}
+    {{- end }}
 receivers:
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver
   filelog:
     include: [ /var/log/pods/*/*/*.log ]
-    {{- if not .Values.agentCollector.containerLogs.includeAgentLogs }}
     # Exclude collector container's logs. The file format is /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<run_id>.log
-    exclude: [ /var/log/pods/{{ .Release.Namespace }}_{{ include "opentelemetry-collector.fullname" . }}*_*/{{ .Chart.Name }}/*.log ]
-    {{- end }}
+    exclude:
+      {{- if .Values.containers.excludeAgentLogs }}
+      - /var/log/pods/{{ .Release.Namespace }}_{{ include "opentelemetry-collector.fullname" . }}*_*/{{ .Chart.Name }}/*.log
+      {{- end }}
+      {{- range $_, $excludePath := .Values.containers.exclude_paths }}
+      - {{ $excludePath }}
+      {{- end }}
     start_at: beginning
     include_file_path: true
     include_file_name: false
+    poll_interval: 200ms
+    resource: {}
+    max_concurrent_files: 1024
+    encoding: nop
+    fingerprint_size: 1kb
+    max_log_size: 1MiB
     operators:
-      {{- if eq .Values.agentCollector.containerLogs.containerRunTime "cri-o" }}
+      {{- if eq .Values.containers.containerRuntime "cri-o" }}
       # Parse CRI-O format
       - type: regex_parser
         id: parser-crio
         regex: '^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) (?P<log>.*)$'
-        output: extract_metadata_from_filepath
         timestamp:
           parse_from: time
           layout_type: gotime
           layout: '2006-01-02T15:04:05.000000000-07:00'
+      - type: recombine
+        output: extract_metadata_from_filepath
+        combine_field: log
+        is_last_entry: "$body.logtag == 'F'"
       - type: restructure
         id: check for empty log
         ops:
@@ -157,18 +131,21 @@ receivers:
               field: log
               value: ""
       {{- end }}
-      {{- if eq .Values.agentCollector.containerLogs.containerRunTime "containerd" }}
+      {{- if eq .Values.containers.containerRuntime "containerd" }}
       # Parse CRI-Containerd format
       - type: regex_parser
         id: parser-containerd
         regex: '^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) (?P<log>.*)$'
-        output: extract_metadata_from_filepath
         timestamp:
           parse_from: time
           layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+      - type: recombine
+        output: extract_metadata_from_filepath
+        combine_field: log
+        is_last_entry: "$body.logtag == 'F'"
       {{- end }}
       # Parse Docker format
-      {{- if eq .Values.agentCollector.containerLogs.containerRunTime "docker" }}
+      {{- if eq .Values.containers.containerRuntime "docker" }}
       - type: json_parser
         id: parser-docker
         output: extract_metadata_from_filepath
@@ -197,8 +174,11 @@ receivers:
           - move:
               from: log
               to: $
-{{- if .Values.agentCollector.containerLogs.enrichK8sMetadata }}
 processors:
+  batch: {}
+  memory_limiter: 
+    {{ include "opentelemetry-collector.memoryLimiter" . | nindent 4 }}
+  {{- if .Values.containers.enrichK8sMetadata }}
   k8s_tagger:
     passthrough: false
     auth_type: "kubeConfig"
@@ -213,27 +193,47 @@ processors:
         - node
         - startTime
       annotations:
-        {{- toYaml .Values.agentCollector.containerLogs.listOfAnnotations | nindent 8 }}
+        {{- toYaml .Values.containers.listOfAnnotations | nindent 8 }}
       labels:
-        {{- toYaml .Values.agentCollector.containerLogs.listOfLabels | nindent 8 }}
+        {{- toYaml .Values.containers.listOfLabels | nindent 8 }}
     filter:
       node_from_env_var: KUBE_NODE_NAME
-{{- end }}
+  resource/splunk:
+    attributes:
+    - key: host.name
+      from_attribute: k8s.node.name
+      action: upsert
+    - key: com.splunk.sourcetype
+      from_attribute: k8s.container.name
+      action: upsert
+    - key: com.splunk.index
+      from_attribute: k8s.pod.annotations.splunk.com/index
+      action: upsert
+  {{- end }}
 exporters:
-  {{- toYaml .Values.agentCollector.containerLogs.exporters | nindent 2 }}
+  splunk_hec: 
+    {{- toYaml .Values.splunk_hec | nindent 4 }}
+  {{- if .Values.containers.containerExporters }}
+  {{- toYaml .Values.containers.containerExporters | nindent 2 }}
+  {{- end }}
 service:
+  extensions:
+    - health_check
+    - file_storage
   pipelines:
     logs:
       receivers:
         - filelog
       processors:
+        - memory_limiter
         - batch
-        {{- if .Values.agentCollector.containerLogs.enrichK8sMetadata }}
+        {{- if .Values.containers.enrichK8sMetadata }}
         - k8s_tagger
         {{- end }}
+        - resource/splunk
       exporters:
-        {{- range $key, $exporterData := .Values.agentCollector.containerLogs.exporters }}
+        - splunk_hec
+        {{- range $key, $exporterData := .Values.containers.containerExporters }}
         - {{ $key }}
         {{- end }}
-{{- end }}
 {{- end }}
