@@ -98,8 +98,26 @@ tolerations: []
 affinity: {}
 
 extraEnvs: []
-extraHostPathMounts: []
-secretMounts: []
+extraHostPathMounts: 
+  - name: nginx
+    hostPath: /nginx
+    mountPath: /nginx
+  - name: apache
+    hostPath: /apache
+    mountPath: /apache
+# Specify configuration for any files other than container log files
+# ref: https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/file_input.md
+extraHostFileConfig:
+  filelog/nginx: #{}
+    include: [/nginx/nginx_error.log]
+    start_at: beginning
+    include_file_path: true
+    include_file_name: false
+  filelog/apache: 
+    include: [/apache/apache.log]
+    start_at: beginning
+    include_file_path: true
+    include_file_name: false
 
 resources:
   limits:
