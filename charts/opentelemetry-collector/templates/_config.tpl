@@ -246,10 +246,12 @@ service:
         - {{ $key }}
         {{ end }}
       processors:
+        - memory_limiter
         - batch
       exporters:
         - splunk_hec
         {{- range $key, $exporterData := .Values.extraHostFileExporters }}
         - {{ $key }}
         {{- end }}
+    {{- end }}
 {{- end }}
