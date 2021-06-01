@@ -232,7 +232,6 @@ service:
         - batch
         {{- if .Values.containers.enrichK8sMetadata }}
         - k8s_tagger
-        - resource/splunk
         {{- end }}
         - resource/splunk
       exporters:
