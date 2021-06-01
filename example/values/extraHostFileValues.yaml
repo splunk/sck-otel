@@ -1,0 +1,138 @@
+# Default values for sck-otel.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Splunk HEC configuration
+splunk_hec:
+  # Required. URL to a Splunk instance to send data to. ie) "http://X.X.X.X:8088/services/collector"
+  endpoint:
+  # Required. Splunk HTTP Event Collector token.
+  token:
+  # Optional. Name of the Splunk index targeted.
+  index:
+  # Maximum HTTP connections to use simultaneously when sending data. Defaults to 200.
+  max_connections: 200
+  # Whether to disable gzip compression over HTTP. Defaults to true.
+  disable_compression: true
+  # HTTP timeout when sending data. Defaults to 10s.
+  timeout: 10s
+  # Whether to skip checking the certificate of the HEC endpoint when sending data over HTTPS. Defaults to true.
+  insecure_skip_verify: true
+  # The PEM-format CA certificate for this client.
+  # NOTE: The content of the certificate itself should be used here, not the file path.
+  #       The certificate will be stored as a secret in kubernetes.
+  clientCert:
+  # The private key for this client.
+  # NOTE: The content of the key itself should be used here, not the file path.
+  #       The key will be stored as a secret in kubernetes.
+  clientKey:
+  # The PEM-format CA certificate file.
+  # NOTE: The content of the file itself should be used here, not the file path.
+  #       The file will be stored as a secret in kubernetes.
+  caFile:
+
+# Persistent storage path for storing checkpoints
+checkpointPath: "/var/log/pods/otel_pos"
+
+# Configurations for container logs
+containers:
+  enabled: true
+  # Container runtime. One of `docker`, `cri-o`, or `containerd`
+  containerRuntime: docker
+  # Path of container log files, default /var/log/pods/*/*/*.log
+  # The file format is /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<run_id>.log
+  path: /var/log/pods/*/*/*.log
+  # Paths of logfiles to exclude. object type is array:
+  exclude_paths: []
+  #  - /var/log/pods/kube-system_*.log (to exclude `kube-system` namespace)
+  # Boolean for ingesting the agent's own log
+  excludeAgentLogs: false
+  # Extra operators for container logs. https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/README.md#what-operators-are-available
+  extraOperators: []
+  # Boolean for enriching container logs with k8s metadata (labels, annotations, etc)
+  enrichK8sMetadata: true
+  # List of annotation and label fields to enrich with
+  listOfAnnotations:
+    - key: splunk.com/index
+    - key: splunk.com/sourcetype
+    - key: splunk.com/exclude
+  listOfLabels:
+    - key: app
+
+  # Any other optional exporter configurations
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter
+  containerExporters: {}
+
+image:
+  repository: otel/opentelemetry-collector-contrib
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+imagePullSecrets: []
+
+# OpenTelemetry Collector executable
+command:
+  name: otelcontribcol
+  extraArgs: []
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podSecurityContext: {}
+securityContext:
+  runAsUser: 0
+podAnnotations: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+extraEnvs: []
+
+# Configuration for tailing additional files
+extraHostPathMounts: 
+  - name: app
+    hostPath: /app
+    mountPath: /app
+  - name: nginx
+    hostPath: /nginx
+    mountPath: /nginx
+# Specify configuration for any files other than container log files
+# ref: https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/file_input.md
+extraHostFileConfig:
+  filelog/app: #{}
+    include: [/app/app_error.log]
+    start_at: beginning
+    include_file_path: true
+    include_file_name: false
+  filelog/nginx: 
+    include: [/nginx/nginx_*.log]
+    start_at: beginning
+    include_file_path: true
+    include_file_name: false
+extraHostFileExporters : {}
+
+secretMounts: []
+
+resources:
+  limits:
+    cpu: 256m
+    memory: 512Mi
+
+# Configuration override that will be merged into the agent's default config
+# Example - this will change `include_file_name` parameter for filelog receiver to `true` from default value `false`
+# configOverride:
+#   receivers:
+#     filelog:
+#       include_file_name: true
+configOverride: {}
