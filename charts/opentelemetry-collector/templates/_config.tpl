@@ -85,9 +85,7 @@ Get otel memory_limiter ballast_size_mib value based on 40% of resources.memory.
 extensions:
   health_check: {}
   file_storage: 
-    {{- with .Values.checkpointPath }}
-    directory: {{ . }}
-    {{- end }}
+    directory: /var/lib/otel_pos
 receivers:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver
   filelog:

@@ -83,7 +83,7 @@ containers:
         readOnly: true
       {{- end }}
       - name: checkpoint
-        mountPath: /var/log/pods/otel_pos
+        mountPath: /var/lib/otel_pos
 volumes:
   - name: {{ .Chart.Name }}-configmap
     configMap:
@@ -111,7 +111,9 @@ volumes:
   {{- end }}
   - name: checkpoint
     hostPath: 
-      path: /var/log/pods/otel_pos
+      {{- with .Values.checkpointPath }}
+      path: {{ . }}
+      {{- end }}
       type: DirectoryOrCreate
 {{- with .Values.nodeSelector }}
 nodeSelector:
