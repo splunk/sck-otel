@@ -98,7 +98,19 @@ tolerations: []
 affinity: {}
 
 extraEnvs: []
+
+# Configuration for tailing additional files
+# extraHostPathMounts:
+#   - name: nginx
+#     hostPath: /nginx
+#     mountPath: /nginx
 extraHostPathMounts: []
+
+# Specify configuration for any files other than container log files
+# ref: https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/file_input.md
+extraHostFileConfig: {}
+extraHostFileExporters: {}
+
 secretMounts: []
 
 resources:

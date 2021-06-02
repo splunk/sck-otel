@@ -8,9 +8,9 @@ fullnameOverride: ""
 # Splunk HEC configuration
 splunk_hec:
   # Required. URL to a Splunk instance to send data to. ie) "http://X.X.X.X:8088/services/collector"
-  endpoint: https://0.0.0.0:8088/services/collector
+  endpoint:
   # Required. Splunk HTTP Event Collector token.
-  token: "00000000-0000-0000-0000-000000000000"
+  token:
   # Optional. Name of the Splunk index targeted.
   index:
   # Maximum HTTP connections to use simultaneously when sending data. Defaults to 200.
@@ -41,7 +41,7 @@ checkpointPath: "/var/log/pods/otel_pos"
 containers:
   enabled: true
   # Container runtime. One of `docker`, `cri-o`, or `containerd`
-  containerRuntime: containerd
+  containerRuntime: docker
   # Path of container log files, default /var/log/pods/*/*/*.log
   # The file format is /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<run_id>.log
   path: /var/log/pods/*/*/*.log
@@ -98,26 +98,31 @@ tolerations: []
 affinity: {}
 
 extraEnvs: []
-extraHostPathMounts:
+
+# Configuration for tailing additional files
+extraHostPathMounts: 
+  - name: app
+    hostPath: /app
+    mountPath: /app
   - name: nginx
     hostPath: /nginx
     mountPath: /nginx
-  - name: apache
-    hostPath: /apache
-    mountPath: /apache
 # Specify configuration for any files other than container log files
 # ref: https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/file_input.md
 extraHostFileConfig:
-  filelog/nginx:
-    include: [/nginx/nginx_error.log]
+  filelog/app: #{}
+    include: [/app/app_error.log]
     start_at: beginning
     include_file_path: true
     include_file_name: false
-  filelog/apache:
-    include: [/apache/apache.log]
+  filelog/nginx: 
+    include: [/nginx/nginx_*.log]
     start_at: beginning
     include_file_path: true
     include_file_name: false
+extraHostFileExporters : {}
+
+secretMounts: []
 
 resources:
   limits:

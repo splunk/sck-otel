@@ -174,6 +174,9 @@ receivers:
           - move:
               from: log
               to: $
+  {{- if .Values.extraHostFileConfig }}
+  {{- toYaml .Values.extraHostFileConfig | nindent 2 }}
+  {{- end }}
 processors:
   batch: {}
   memory_limiter: 
@@ -239,4 +242,19 @@ service:
         {{- range $key, $exporterData := .Values.containers.containerExporters }}
         - {{ $key }}
         {{- end }}
+    {{- if .Values.extraHostFileConfig }}
+    logs/extraFiles:
+      receivers:
+        {{- range $key, $exporterData := .Values.extraHostFileConfig }}
+        - {{ $key }}
+        {{ end }}
+      processors:
+        - memory_limiter
+        - batch
+      exporters:
+        - splunk_hec
+        {{- range $key, $exporterData := .Values.extraHostFileExporters }}
+        - {{ $key }}
+        {{- end }}
+    {{- end }}
 {{- end }}
