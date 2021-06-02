@@ -120,7 +120,7 @@ receivers:
       - type: recombine
         output: extract_metadata_from_filepath
         combine_field: log
-        is_last_entry: "$body.logtag == 'F'"
+        is_last_entry: "($.logtag) == 'F'"
       - type: restructure
         id: check for empty log
         ops:
@@ -140,7 +140,7 @@ receivers:
       - type: recombine
         output: extract_metadata_from_filepath
         combine_field: log
-        is_last_entry: "$body.logtag == 'F'"
+        is_last_entry: "($.logtag) == 'F'"
       {{- end }}
       # Parse Docker format
       {{- if eq .Values.containers.containerRuntime "docker" }}
