@@ -207,9 +207,12 @@ processors:
       from_attribute: k8s.container.name
       action: upsert
     - key: com.splunk.index
+      from_attribute: k8s.namespace.annotations.splunk.com/index
+      action: upsert
+    - key: com.splunk.index
       from_attribute: k8s.pod.annotations.splunk.com/index
       action: upsert
-  {{- end }}
+{{- end }}
 exporters:
   splunk_hec: 
     {{- toYaml .Values.splunk_hec | nindent 4 }}
