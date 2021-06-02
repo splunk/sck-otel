@@ -35,7 +35,7 @@ splunk_hec:
   caFile:
 
 # Persistent storage path for storing checkpoints
-checkpointPath: "/var/log/pods/otel_pos"
+checkpointPath: "/var/lib/otel_pos"
 
 # Configurations for container logs
 containers:

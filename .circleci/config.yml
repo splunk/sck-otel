@@ -142,6 +142,7 @@ commands:
             export PYTHONWARNINGS="ignore:Unverified HTTPS request"
             export CI_SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
             .circleci/run_functional_tests.sh
+            kubectl logs -l component=agent-collector
 
 executors:
   integration_tests:
