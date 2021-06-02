@@ -29,17 +29,6 @@ in a Kubernetes cluster. More detailed documentation can be found in
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-Approvers ([@open-telemetry/helm-approvers](https://github.com/orgs/open-telemetry/teams/helm-approvers)):
-
-- [Naseem K. Ullah](https://github.com/naseemkullah), Transit
-
-Maintainers ([@open-telemetry/helm-maintainers](https://github.com/orgs/open-telemetry/teams/helm-maintainers)):
-
-- [Tigran Najaryan](https://github.com/tigrannajaryan), Splunk
-- [Dmitrii Anoshin](https://github.com/dmitryax), Splunk
-
-Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/main/community-membership.md).
-
 ## License
 
 [Apache 2.0 License](./LICENSE).
