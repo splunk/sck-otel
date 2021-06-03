@@ -13,6 +13,10 @@ splunk_hec:
   token:
   # Optional. Name of the Splunk index targeted.
   index:
+  # Optional. Default value for `source` field. 
+  source: "kubernetes"
+  # Optional. Default value for `sourcetype` field. For container logs, it will be container name.
+  sourcetype: 
   # Maximum HTTP connections to use simultaneously when sending data. Defaults to 200.
   max_connections: 200
   # Whether to disable gzip compression over HTTP. Defaults to true.
@@ -66,6 +70,11 @@ containers:
   # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter
   containerExporters: {}
+
+# List of key/value pairs for metadata purpose.
+# Can be used to define things such as cloud_account_id, cloud_account_region, etc.
+customMetadata: {}
+#  cloud_account_id: "1234567890"
 
 image:
   repository: otel/opentelemetry-collector-contrib

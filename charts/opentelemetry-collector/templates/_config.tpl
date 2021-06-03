@@ -102,7 +102,10 @@ receivers:
     include_file_path: true
     include_file_name: false
     poll_interval: 200ms
-    resource: {}
+    {{- if .Values.customMetadata }}
+    resource: 
+      {{- toYaml .Values.customMetadata | nindent 6 }}
+    {{- end }}
     max_concurrent_files: 1024
     encoding: nop
     fingerprint_size: 1kb
@@ -205,7 +208,10 @@ processors:
       from_attribute: k8s.node.name
       action: upsert
     - key: com.splunk.sourcetype
-      from_attribute: k8s.container.name
+      from_attribute: container_name
+      action: upsert
+    - key: com.splunk.sourcetype
+      from_attribute: k8s.pod.annotations.splunk.com/sourcetype
       action: upsert
     - key: com.splunk.index
       from_attribute: k8s.namespace.annotations.splunk.com/index
