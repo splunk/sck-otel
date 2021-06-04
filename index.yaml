@@ -61,4 +61,24 @@ entries:
     urls:
     - https://github.com/splunk/sck-otel/releases/download/opentelemetry-collector-0.5.9/opentelemetry-collector-0.5.9.tgz
     version: 0.5.9
-generated: "2021-06-04T04:07:31.180636261Z"
+  - apiVersion: v2
+    appVersion: 0.27.0
+    created: "2021-06-04T21:46:15.959480069Z"
+    description: Helm chart for Splunk with Open Telemetry Agent
+    digest: 175a6f2f3c47316f01a6d8f1c7d6f280819d90420ea6010fd69e33ed8a1245b2
+    home: https://opentelemetry.io/
+    maintainers:
+    - name: anujg-splunk
+    - name: chaitanyaphalak
+    - name: luckyj5
+    - name: mwang2016
+    - name: rockb1017
+    name: opentelemetry-collector
+    sources:
+    - https://github.com/open-telemetry/opentelemetry-collector
+    - https://github.com/open-telemetry/opentelemetry-collector-contrib
+    type: application
+    urls:
+    - https://github.com/splunk/sck-otel/releases/download/opentelemetry-collector-0.1.0/opentelemetry-collector-0.1.0.tgz
+    version: 0.1.0
+generated: "2021-06-04T21:46:15.959493469Z"
