@@ -13,10 +13,10 @@ splunk_hec:
   token:
   # Optional. Name of the Splunk index targeted.
   index:
-  # Optional. Default value for `source` field. 
+  # Optional. Default value for `source` field.
   source: "kubernetes"
   # Optional. Default value for `sourcetype` field. For container logs, it will be container name.
-  sourcetype: 
+  sourcetype:
   # Maximum HTTP connections to use simultaneously when sending data. Defaults to 200.
   max_connections: 200
   # Whether to disable gzip compression over HTTP. Defaults to true.
