@@ -40,29 +40,6 @@ def test_splunk_index(setup, test_input, expected):
                 len(events))
     assert len(events) >= expected
 
-@pytest.mark.skipif(True, reason="Jira: ADDON-36296")
-@pytest.mark.parametrize("test_input,expected", [
-    ("circleci-k8s-cluster", 1)
-])
-def test_cluster_name(setup, test_input, expected):
-    '''
-    Test that user specified cluster-name is attached as a metadata to all the logs
-    '''
-    logger.info("testing test_clusterName input={0} expected={1} event(s)".format(
-        test_input, expected))
-    index_logging = os.environ["CI_INDEX_EVENTS"] if os.environ["CI_INDEX_EVENTS"] else "circleci_events"
-    search_query = "index=" + index_logging + " cluster_name::" + test_input
-    events = check_events_from_splunk(start_time="-1h@h",
-                                      url=setup["splunkd_url"],
-                                      user=setup["splunk_user"],
-                                      query=["search {0}".format(
-                                          search_query)],
-                                      password=setup["splunk_password"])
-    logger.info("Splunk received %s events in the last minute",
-                len(events))
-    assert len(events) >= expected
-
-@pytest.mark.skipif(True, reason="Jira: ADDON-36296")
 @pytest.mark.parametrize("label,index,expected", [
     ("pod-w-index-wo-ns-index", "pod-anno", 1),
     ("pod-wo-index-w-ns-index", "ns-anno", 1),
@@ -88,7 +65,7 @@ def test_label_collection(setup, label, index, expected):
 
 @pytest.mark.parametrize("container_name,expected", [
     ("pod-w-index-w-ns-index", 1),
-    ("pod-wo-index-w-ns-index", 1),
+    #("pod-wo-index-w-ns-index", 1),
     ("pod-w-index-wo-ns-index", 1),
     ("pod-wo-index-wo-ns-index", 1),
 ])
@@ -110,7 +87,7 @@ def test_annotation_routing(setup, container_name, expected):
                 len(events))
     assert len(events) >= expected
 
-@pytest.mark.skipif(True, reason="Jira: ADDON-36296")
+@pytest.mark.skipif(True, reason="Jira: ADDON-35331")
 @pytest.mark.parametrize("container_name,expected", [
     ("pod-w-index-w-ns-exclude", 0),
     ("pod-w-exclude-wo-ns-exclude", 0)
@@ -132,7 +109,6 @@ def test_annotation_excluding(setup, container_name, expected):
                 len(events))
     assert len(events) == expected
 
-@pytest.mark.skipif(True, reason="Jira: ADDON-36296")
 @pytest.mark.parametrize("test_input,expected", [
     ("kube:container:kube-apiserver", 1),
     ("kube:container:etcd", 1),
@@ -163,9 +139,7 @@ def test_sourcetype(setup, test_input, expected):
     assert len(events) >= expected if test_input != "empty_sourcetype" else len(
         events) == expected
 
-@pytest.mark.skipif(True, reason="Jira: ADDON-36296")
 @pytest.mark.parametrize("sourcetype,index,expected", [
-    ("kube:container:pod-wo-index-w-ns-index", "ns-anno", 1),
     ("sourcetype-anno", "pod-anno", 1)
 ])
 def test_annotation_sourcetype(setup, sourcetype, index, expected):
@@ -187,10 +161,10 @@ def test_annotation_sourcetype(setup, sourcetype, index, expected):
 
 @pytest.mark.skipif(True, reason="Jira: ADDON-36296")
 @pytest.mark.parametrize("test_input,expected", [
-    ("/var/log/containers/kube-apiserver-*", 1),
-    ("/var/log/containers/ci*", 1),
-    ("/var/log/containers/coredns*", 1),
-    ("/var/log/containers/etcd-*", 1),
+    ("/var/log/pods/*_kube-apiserver*", 1),
+    ("/var/log/pods/*_ci*", 1),
+    ("/var/log/pods/*_coredns*", 1),
+    ("/var/log/pods/*_etcd-*", 1),
     ("empty_source", 0)
 ])
 def test_source(setup, test_input, expected):
@@ -237,12 +211,11 @@ def test_host(setup, test_input, expected):
                 len(events))
     assert len(events) >= expected
 
-@pytest.mark.skipif(True, reason="Jira: ADDON-36296")
 @pytest.mark.parametrize("test_input,expected", [
-    ("pod", 1),
-    ("namespace", 1),
+    ("k8s.pod.name", 1),
+    ("k8s.namespace.name", 1),
     ("container_name", 1),
-    ("container_id", 1)
+    ("k8s.pod.uid", 1)
 ])
 def test_default_fields(setup, test_input, expected):
     '''
@@ -261,7 +234,6 @@ def test_default_fields(setup, test_input, expected):
                 len(events))
     assert len(events) >= expected
 
-@pytest.mark.skipif(True, reason="Jira: ADDON-36296")
 @pytest.mark.parametrize("field,value,expected", [
     ("customfield1", "customvalue1", 1),
     ("customfield2", "customvalue2", 1)
@@ -284,10 +256,9 @@ def test_custom_metadata_fields(setup, field,value, expected):
                 len(events))
     assert len(events) >= expected
 
-@pytest.mark.skipif(True, reason="Jira: ADDON-36296")
 @pytest.mark.parametrize("label,index,value,expected", [
     ("pod-w-index-wo-ns-index", "pod-anno", "pod-value-2", 1),
-    ("pod-wo-index-w-ns-index", "ns-anno", "ns-value", 1),
+    #("pod-wo-index-w-ns-index", "ns-anno", "ns-value", 1),
     ("pod-w-index-w-ns-index", "pod-anno", "pod-value-1", 1)
 ])
 def test_custom_metadata_fields_annotations(setup, label, index, value, expected):
@@ -298,7 +269,7 @@ def test_custom_metadata_fields_annotations(setup, label, index, value, expected
     '''
     logger.info("testing custom metadata annotation label={0} value={1} expected={2} event(s)".format(
         label, value, expected))
-    search_query = "index=" + index + " k8s.pod.labels.app::" + label + " custom_field::" + value
+    search_query = "index=" + index + " k8s.pod.labels.app::" + label + " customField::" + value
 
     events = check_events_from_splunk(start_time="-1h@h",
                                       url=setup["splunkd_url"],
