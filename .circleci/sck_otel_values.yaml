@@ -60,7 +60,7 @@ containers:
     - key: splunk.com/sourcetype
     - key: splunk.com/exclude
     - key: splunk.com/customField
-      TagName: customField
+      tag_name: customField
   listOfLabels:
     - key: app
 
