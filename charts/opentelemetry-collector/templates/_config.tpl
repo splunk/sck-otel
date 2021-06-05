@@ -23,7 +23,10 @@ Build config file for agent OpenTelemetry Collector
 {{- $values := deepCopy .Values | mustMergeOverwrite (deepCopy .Values)  }}
 {{- $data := dict "Values" $values | mustMergeOverwrite (deepCopy .) }}
 {{- $config := include "opentelemetry-collector.agent.containerLogsConfig" $data | fromYaml }}
-{{- .Values.configOverride | mustMergeOverwrite $config | toYaml }}
+{{- $config := .Values.configOverride | mustMergeOverwrite $config }}
+{{- include "opentelemetry-collector.agent.hecConfig" . | fromYaml | mustMergeOverwrite $config | toYaml }}
+
+# {{- .Values.configOverride | mustMergeOverwrite $config | toYaml }}
 {{- end }}
 
 {{/*
@@ -80,6 +83,13 @@ Get otel memory_limiter ballast_size_mib value based on 40% of resources.memory.
 {{- define "opentelemetry-collector.getMemBallastSizeMib" }}
 {{- div (mul (include "opentelemetry-collector.convertMemToMib" .) 40) 100 }}
 {{- end -}}
+
+{{- define "opentelemetry-collector.agent.hecConfig" -}}
+exporters:
+  splunk_hec:
+    splunk_app_name: {{ .Chart.Name }}
+    splunk_app_version: {{ .Chart.Version }}
+{{- end }}
 
 {{- define "opentelemetry-collector.agent.containerLogsConfig" -}}
 extensions:
@@ -149,11 +159,15 @@ receivers:
       {{- if eq .Values.containers.containerRuntime "docker" }}
       - type: json_parser
         id: parser-docker
-        output: extract_metadata_from_filepath
         timestamp:
           parse_from: time
           layout: '%Y-%m-%dT%H:%M:%S.%LZ'
       {{- end }}
+      # Store the file_path to `service.name` field (`source` field)
+      - type: metadata
+        id: filename
+        resource:
+          service.name: EXPR($$attributes.file_path)
       # Extract metadata from file path
       - type: regex_parser
         id: extract_metadata_from_filepath
@@ -168,6 +182,7 @@ receivers:
           container_name: 'EXPR($.container_name)'
           k8s.namespace.name: 'EXPR($.namespace)'
           k8s.pod.name: 'EXPR($.pod_name)'
+          com.splunk.sourcetype: 'EXPR("kube:container:"+$.container_name)'
       # Clean up log record
       - type: restructure
         id: clean-up-log-record
@@ -206,9 +221,6 @@ processors:
     attributes:
     - key: host.name
       from_attribute: k8s.node.name
-      action: upsert
-    - key: com.splunk.sourcetype
-      from_attribute: container_name
       action: upsert
     - key: com.splunk.sourcetype
       from_attribute: k8s.pod.annotations.splunk.com/sourcetype
