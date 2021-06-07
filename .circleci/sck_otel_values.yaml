@@ -59,6 +59,8 @@ containers:
     - key: splunk.com/index
     - key: splunk.com/sourcetype
     - key: splunk.com/exclude
+    - key: splunk.com/customField
+      tag_name: customField
   listOfLabels:
     - key: app
 
@@ -67,6 +69,11 @@ containers:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter
   containerExporters: {}
 
+customMetadata: 
+  cluster_name: circleci-k8s-cluster
+  customfield1: customvalue1
+  customfield2: customvalue2
+  
 image:
   repository: otel/opentelemetry-collector-contrib
   pullPolicy: IfNotPresent

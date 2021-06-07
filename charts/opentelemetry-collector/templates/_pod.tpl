@@ -7,7 +7,7 @@ serviceAccountName: {{ include "opentelemetry-collector.serviceAccountName" . }}
 securityContext:
   {{- toYaml .Values.podSecurityContext | nindent 2 }}
 containers:
-  - name: {{ .Chart.Name }}
+  - name: otelcollector
     command:
       - /{{ .Values.command.name }}
       - --config=/conf/relay.yaml
@@ -75,8 +75,8 @@ containers:
         {{- end }}
       {{- end }}
       {{- if .Values.containers.enabled }}
-      - name: varlogpods
-        mountPath: /var/log/pods
+      - name: varlog
+        mountPath: /var/log
         readOnly: true
       - name: varlibdockercontainers
         mountPath: /var/lib/docker/containers
@@ -102,9 +102,9 @@ volumes:
       secretName: {{ .secretName }}
   {{- end }}
   {{- if .Values.containers.enabled }}
-  - name: varlogpods
+  - name: varlog
     hostPath:
-      path: /var/log/pods
+      path: /var/log
   - name: varlibdockercontainers
     hostPath:
       path: /var/lib/docker/containers

@@ -5,7 +5,7 @@ metadata:
   name: ns-w-index
   annotations:
     splunk.com/index: ns-anno
-    splunk.com/custom-field: ns-value
+    splunk.com/customField: ns-value
 ---
 apiVersion: v1
 kind: Namespace
@@ -37,7 +37,7 @@ spec:
       annotations:
         splunk.com/index: "pod-anno"
         splunk.com/sourcetype: "sourcetype-anno"
-        splunk.com/custom-field: pod-value-1
+        splunk.com/customField: pod-value-1
     spec:
       containers:
       - name: pod-w-index-w-ns-index
@@ -84,7 +84,7 @@ spec:
         app: pod-w-index-wo-ns-index
       annotations:
         splunk.com/index: "pod-anno"
-        splunk.com/custom-field: pod-value-2
+        splunk.com/customField: pod-value-2
     spec:
       containers:
       - name: pod-w-index-wo-ns-index
