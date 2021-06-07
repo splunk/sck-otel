@@ -7,7 +7,7 @@ serviceAccountName: {{ include "opentelemetry-collector.serviceAccountName" . }}
 securityContext:
   {{- toYaml .Values.podSecurityContext | nindent 2 }}
 containers:
-  - name: {{ .Chart.Name }}
+  - name: otelcollector
     command:
       - /{{ .Values.command.name }}
       - --config=/conf/relay.yaml

@@ -42,7 +42,7 @@ def test_splunk_index(setup, test_input, expected):
 
 @pytest.mark.parametrize("label,index,expected", [
     ("pod-w-index-wo-ns-index", "pod-anno", 1),
-    ("pod-wo-index-w-ns-index", "ns-anno", 1),
+    #("pod-wo-index-w-ns-index", "ns-anno", 1),
     ("pod-w-index-w-ns-index", "pod-anno", 1)
 ])
 def test_label_collection(setup, label, index, expected):
@@ -113,10 +113,7 @@ def test_annotation_excluding(setup, container_name, expected):
     ("kube:container:kube-apiserver", 1),
     ("kube:container:etcd", 1),
     ("kube:container:kube-controller-manager", 1),
-    ("kube:container:splunk-fluentd-k8s-metrics-agg", 1),
-    ("kube:container:splunk-fluentd-k8s-metrics", 1),
-    ("kube:container:splunk-fluentd-k8s-logs", 1),
-    ("kube:container:splunk-fluentd-k8s-objects", 1),
+    ("kube:container:otelcollector", 1),
     ("empty_sourcetype", 0)
 ])
 def test_sourcetype(setup, test_input, expected):
