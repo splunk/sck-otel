@@ -213,25 +213,22 @@ def test_source(setup, test_input, expected):
     assert len(events) >= expected if test_input != "empty_source" else len(
         events) == expected
 
-
-@pytest.mark.parametrize("test_input,expected", [
-    ("dummy_host", 1),
-    ("empty_host", 0)
+@pytest.mark.parametrize("test_input,host_name,expected", [
+    ("valid_host", "minikube", 1),
+    ("empty_host", "", 0)
 ])
-def test_host(setup, test_input, expected):
+def test_host(setup, test_input, host_name, expected):
     '''
     Test that known hosts are present in target index
     '''
     logger.info("testing for presence of host={0} expected={1} event(s)".format(
         test_input, expected))
     index_logging = os.environ["CI_INDEX_EVENTS"] if os.environ["CI_INDEX_EVENTS"] else "circleci_events"
-    host = ' host!=""' if test_input == "dummy_host" else ' host=""'
-    search_query = "index=" + index_logging + host
+    search_query = "index={0} host=\"{1}\"".format(index_logging, host_name)
     events = check_events_from_splunk(start_time="-24h@h",
                                       url=setup["splunkd_url"],
                                       user=setup["splunk_user"],
-                                      query=["search {0}".format(
-                                          search_query)],
+                                      query=["search {0}".format(search_query)],
                                       password=setup["splunk_password"])
     logger.info("Splunk received %s events in the last minute",
                 len(events))
