@@ -1,4 +1,4 @@
-# JWT Webhook Integration Tests Environment Setup
+# SCK-OTEL Integration Tests Environment Setup
 
 ## Prerequsite
 * Python version must be > 3.x
@@ -35,7 +35,6 @@
         helm install sck -f <YOUR_VALUES.yaml> charts/opentelemetry-collector/
         
     3. Deploy log generator
-        docker pull rock1017/log-generator:2.2.4
         kubectl apply -f test/test_setup.yaml
 ## Testing Instructions
 0. (Optional) Use a virtual environment for the test  
@@ -48,7 +47,7 @@
 
     **Options are:**  
     --splunkd-url
-    * Description: splunkd url used to send test data to. Eg: https://localhost:8089  
+    * Description: splunkd url used to send test data to. Eg: https://$CI_SPLUNK_HOST:8089  
     * Default: https://localhost:8089
 
     --splunk-user
@@ -56,6 +55,6 @@
     * Default: admin
 
     --splunk-password
-    * Description: splunk user password  
+    * Description: splunk user password Eg: helloworld  
     * Default: changeme
 
