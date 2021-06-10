@@ -119,7 +119,7 @@ extraHostPathMounts: []
 # ref: https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/file_input.md
 extraHostFileConfig: {}
 
-# Sample configuration to collect Audit logs. Please note mountPath and hostPath will vary depending on the audit-policy.yaml configuration.
+# Sample configuration to collect Audit logs. Please note mountPath and hostPath can vary depending on the audit-policy.yaml configuration.
 # extraHostPathMounts:
 #  - name: audit-log
 #    hostPath: /var/log/kubernetes/apiserver
@@ -131,6 +131,10 @@ extraHostFileConfig: {}
 #    start_at: beginning
 #    include_file_path: true
 #    include_file_name: false
+#    resource:
+#      service.name: /var/log/kubernetes/apiserver/audit.log
+#      host.name: 'EXPR(env("KUBE_NODE_NAME"))'
+#      com.splunk.sourcetype: kube:apiserver-audit
 
 extraHostFileExporters: {}
 
