@@ -66,11 +66,6 @@ containers:
   listOfLabels:
     - key: app
 
-  # Any other optional exporter configurations
-  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter
-  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter
-  containerExporters: {}
-
 # List of key/value pairs for metadata purpose.
 # Can be used to define things such as cloud_account_id, cloud_account_region, etc.
 customMetadata: {}
@@ -146,9 +141,15 @@ resources:
     memory: 512Mi
 
 # Configuration override that will be merged into the agent's default config
-# Example - this will change `include_file_name` parameter for filelog receiver to `true` from default value `false`
+# Example - this will add `logging` exporter for container logs
 # configOverride:
-#   receivers:
-#     filelog:
-#       include_file_name: true
+#   exporters:
+#     logging/container:
+#       loglevel: info
+#   service:
+#     pipelines:
+#       logs/container:
+#         exporters:
+#           - logging/container
+#           - splunk_hec
 configOverride: {}
