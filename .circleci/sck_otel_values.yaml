@@ -64,11 +64,6 @@ containers:
   listOfLabels:
     - key: app
 
-  # Any other optional exporter configurations
-  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter
-  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter
-  containerExporters: {}
-
 customMetadata: 
   cluster_name: circleci-k8s-cluster
   customfield1: customvalue1

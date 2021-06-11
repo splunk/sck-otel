@@ -25,8 +25,6 @@ Build config file for agent OpenTelemetry Collector
 {{- $config := include "opentelemetry-collector.agent.containerLogsConfig" $data | fromYaml }}
 {{- $config := .Values.configOverride | mustMergeOverwrite $config }}
 {{- include "opentelemetry-collector.agent.hecConfig" . | fromYaml | mustMergeOverwrite $config | toYaml }}
-
-# {{- .Values.configOverride | mustMergeOverwrite $config | toYaml }}
 {{- end }}
 
 {{/*
@@ -235,9 +233,6 @@ processors:
 exporters:
   splunk_hec: 
     {{- toYaml .Values.splunk_hec | nindent 4 }}
-  {{- if .Values.containers.containerExporters }}
-  {{- toYaml .Values.containers.containerExporters | nindent 2 }}
-  {{- end }}
 service:
   extensions:
     - health_check
@@ -255,9 +250,6 @@ service:
         - resource/splunk
       exporters:
         - splunk_hec
-        {{- range $key, $exporterData := .Values.containers.containerExporters }}
-        - {{ $key }}
-        {{- end }}
     {{- if .Values.extraHostFileConfig }}
     logs/extraFiles:
       receivers:
@@ -269,8 +261,5 @@ service:
         - batch
       exporters:
         - splunk_hec
-        {{- range $key, $exporterData := .Values.extraHostFileExporters }}
-        - {{ $key }}
-        {{- end }}
     {{- end }}
 {{- end }}
