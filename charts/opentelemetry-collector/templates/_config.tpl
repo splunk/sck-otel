@@ -192,7 +192,10 @@ receivers:
   {{- toYaml .Values.extraHostFileConfig | nindent 2 }}
   {{- end }}
 processors:
-  batch: {}
+  batch: 
+    send_batch_size: {{ .Values.batch.send_batch_size | default 8192 }}
+    timeout: {{ .Values.batch.timeout | quote | default "200ms" }}
+    send_batch_max_size: {{ .Values.batch.send_batch_max_size | default 0 }}
   memory_limiter: 
     {{ include "opentelemetry-collector.memoryLimiter" . | nindent 4 }}
   {{- if .Values.containers.enrichK8sMetadata }}
