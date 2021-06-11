@@ -15,8 +15,8 @@
       minikube start --driver=docker --container-runtime=$CONTAINER_RUNTIME --cpus 3 --memory 8192 --kubernetes-version=v1.15.2 --no-vtx-check 
 
 #### Install Splunk on minikube  
-    # Use .circleci/k8s-splunk.yml file to deploy splunk on minikube 
-    kubectl apply -f .circleci/k8s-splunk.yml
+    # Use ci_scripts/k8s-splunk.yml file to deploy splunk on minikube 
+    kubectl apply -f ci_scripts/k8s-splunk.yml
     
     # Run following command to check if Splunk is ready. User should see "Ansible playbook complete, will begin streaming splunkd_stderr.log"
     kubectl logs splunk -f
@@ -26,7 +26,7 @@
     kubectl port-forward pods/splunk 8089
     
     # Setup Indexes
-    curl -k -u admin:helloworld https://localhost:8089/services/data/indexes -d name=circleci_events -d datatype=event
+    curl -k -u admin:helloworld https://localhost:8089/services/data/indexes -d name=ci_events -d datatype=event
     curl -k -u admin:helloworld https://localhost:8089/services/data/indexes -d name=ns-anno -d datatype=event
     curl -k -u admin:helloworld https://localhost:8089/services/data/indexes -d name=pod-anno -d datatype=event
     
@@ -47,14 +47,14 @@
     # Get Splunk Host IP
     export SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
     
-    # Use .circleci/sck_otel_values.yaml file to deploy sck otel connector
+    # Use ci_scripts/sck_otel_values.yaml file to deploy sck otel connector
     # Default image repository: otel/opentelemetry-collector-contrib    
     helm install sck-otel \
-    --set splunk_hec.index=circleci_events \
+    --set splunk_hec.index=ci_events \
     --set splunk_hec.token=a6b5e77f-d5f6-415a-bd43-930cecb12959 \
     --set splunk_hec.endpoint=https://$SPLUNK_HOST:8088/services/collector \
     --set containers.containerRuntime=$CONTAINER_RUNTIME \
-    -f .circleci/sck_otel_values.yaml charts/opentelemetry-collector/
+    -f ci_scripts/sck_otel_values.yaml charts/opentelemetry-collector/
 
 #### Deploy log generator
     # Use test/test_setup.yaml file to deploy log generator
