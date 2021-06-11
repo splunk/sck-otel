@@ -238,7 +238,7 @@ service:
     - health_check
     - file_storage
   pipelines:
-    logs:
+    logs/container:
       receivers:
         - filelog
       processors:

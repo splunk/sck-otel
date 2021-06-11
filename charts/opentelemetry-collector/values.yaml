@@ -142,13 +142,13 @@ resources:
 
 # Configuration override that will be merged into the agent's default config
 # Example - this will add `logging` exporter for container logs
-# configOverride: 
+# configOverride:
 #   exporters:
 #     logging/container:
 #       loglevel: info
 #   service:
 #     pipelines:
-#       logs:
+#       logs/container:
 #         exporters:
 #           - logging/container
 #           - splunk_hec
