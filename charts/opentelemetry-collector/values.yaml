@@ -71,6 +71,13 @@ containers:
 customMetadata: {}
 #  cloud_account_id: "1234567890"
 
+# Batch configuration
+# https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/batchprocessor
+batch:
+  send_batch_size: 8192
+  timeout: 200ms
+  send_batch_max_size: 0
+
 image:
   repository: otel/opentelemetry-collector-contrib
   pullPolicy: IfNotPresent
