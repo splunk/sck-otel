@@ -84,6 +84,11 @@ containers:
       {{- end }}
       - name: checkpoint
         mountPath: /var/lib/otel_pos
+      {{- if or .Values.splunk_hec.clientCert .Values.splunk_hec.clientKey .Values.splunk_hec.caFile }}
+      - name: secret
+        mountPath: /otel/etc
+        readOnly: true
+      {{- end }}
 volumes:
   - name: {{ .Chart.Name }}-configmap
     configMap:
@@ -115,6 +120,11 @@ volumes:
       path: {{ . }}
       {{- end }}
       type: DirectoryOrCreate
+  {{- if or .Values.splunk_hec.clientCert .Values.splunk_hec.clientKey .Values.splunk_hec.caFile }}
+  - name: secret
+    secret:
+      secretName: {{ template "opentelemetry-collector.secret" . }}
+  {{- end }}
 {{- with .Values.nodeSelector }}
 nodeSelector:
   {{- toYaml . | nindent 2 }}
