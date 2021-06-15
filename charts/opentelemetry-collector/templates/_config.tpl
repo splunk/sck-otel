@@ -181,6 +181,23 @@ receivers:
           k8s.namespace.name: 'EXPR($.namespace)'
           k8s.pod.name: 'EXPR($.pod_name)'
           com.splunk.sourcetype: 'EXPR("kube:container:"+$.container_name)'
+
+      {{- if .Values.containers.multilineSupportConfig }}
+      - type: router
+        routes:
+        {{- range $.Values.containers.multilineSupportConfig }}
+        - output: {{ .containerName | quote }}
+          expr: '($.container_name) == {{ .containerName | quote }}'
+        {{- end }}
+      {{- range $.Values.containers.multilineSupportConfig }}
+      - type: recombine
+        id: {{.containerName | quote }}
+        output: clean-up-log-record
+        combine_field: log
+        is_first_entry: '($.log) matches {{ .first_entry_regex | quote }}'
+      {{- end }}
+      {{- end }}
+
       # Clean up log record
       - type: restructure
         id: clean-up-log-record
