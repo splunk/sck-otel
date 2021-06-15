@@ -245,13 +245,13 @@ exporters:
     timeout: {{ .Values.splunk_hec.timeout }}
     insecure_skip_verify: {{ .Values.splunk_hec.insecure_skip_verify }}
     {{- if .Values.splunk_hec.clientCert }}
-    clientCert: /otel/etc/hec_client_cert
+    cert_file: /otel/etc/hec_client_cert
     {{- end }}
     {{- if .Values.splunk_hec.clientKey  }}
-    clientKey: /otel/etc/hec_client_key
+    key_file: /otel/etc/hec_client_key
     {{- end }}
     {{- if .Values.splunk_hec.caFile }}
-    caFile: /otel/etc/hec_ca_file
+    ca_file: /otel/etc/hec_ca_file
     {{- end }}
 service:
   extensions:
