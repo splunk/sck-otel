@@ -234,6 +234,7 @@ processors:
         {{- toYaml .Values.containers.listOfLabels | nindent 8 }}
     filter:
       node_from_env_var: KUBE_NODE_NAME
+  {{- end }}
   resource/splunk:
     attributes:
     - key: host.name
@@ -248,10 +249,26 @@ processors:
     - key: com.splunk.index
       from_attribute: k8s.pod.annotations.splunk.com/index
       action: upsert
-{{- end }}
 exporters:
   splunk_hec: 
-    {{- toYaml .Values.splunk_hec | nindent 4 }}
+    endpoint: {{ .Values.splunk_hec.endpoint | quote }}
+    token: {{ .Values.splunk_hec.token | quote }}
+    index: {{ .Values.splunk_hec.index | quote }}
+    source: {{ .Values.splunk_hec.source | quote }}
+    sourcetype: {{ .Values.splunk_hec.sourcetype | quote }}
+    max_connections: {{ .Values.splunk_hec.max_connections }}
+    disable_compression: {{ .Values.splunk_hec.disable_compression }}
+    timeout: {{ .Values.splunk_hec.timeout }}
+    insecure_skip_verify: {{ .Values.splunk_hec.insecure_skip_verify }}
+    {{- if .Values.splunk_hec.clientCert }}
+    clientCert: /otel/etc/hec_client_cert
+    {{- end }}
+    {{- if .Values.splunk_hec.clientKey  }}
+    clientKey: /otel/etc/hec_client_key
+    {{- end }}
+    {{- if .Values.splunk_hec.caFile }}
+    caFile: /otel/etc/hec_ca_file
+    {{- end }}
 service:
   extensions:
     - health_check
