@@ -65,6 +65,7 @@ containers:
     - key: splunk.com/exclude
   listOfLabels:
     - key: app
+  multilineSupportConfig: []
 
 # List of key/value pairs for metadata purpose.
 # Can be used to define things such as cloud_account_id, cloud_account_region, etc.
