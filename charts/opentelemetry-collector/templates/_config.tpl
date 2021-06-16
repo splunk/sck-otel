@@ -269,6 +269,7 @@ exporters:
     {{- if .Values.splunk_hec.caFile }}
     ca_file: /otel/etc/hec_ca_file
     {{- end }}
+    server_name_override: host.docker.internal
 service:
   extensions:
     - health_check
