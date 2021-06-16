@@ -92,7 +92,7 @@ exporters:
 {{- define "opentelemetry-collector.agent.containerLogsConfig" -}}
 extensions:
   health_check: {}
-  file_storage: 
+  file_storage:
     directory: /var/lib/otel_pos
 receivers:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver
@@ -111,7 +111,7 @@ receivers:
     include_file_name: false
     poll_interval: 200ms
     {{- if .Values.customMetadata }}
-    resource: 
+    resource:
       {{- toYaml .Values.customMetadata | nindent 6 }}
     {{- end }}
     max_concurrent_files: 1024
@@ -208,11 +208,11 @@ receivers:
   {{- toYaml .Values.extraHostFileConfig | nindent 2 }}
   {{- end }}
 processors:
-  batch: 
+  batch:
     send_batch_size: {{ .Values.batch.send_batch_size | default 8192 }}
     timeout: {{ .Values.batch.timeout | quote | default "200ms" }}
     send_batch_max_size: {{ .Values.batch.send_batch_max_size | default 0 }}
-  memory_limiter: 
+  memory_limiter:
     {{ include "opentelemetry-collector.memoryLimiter" . | nindent 4 }}
   {{- if .Values.containers.enrichK8sMetadata }}
   k8s_tagger:
@@ -250,7 +250,7 @@ processors:
       from_attribute: k8s.pod.annotations.splunk.com/index
       action: upsert
 exporters:
-  splunk_hec: 
+  splunk_hec:
     endpoint: {{ .Values.splunk_hec.endpoint | quote }}
     token: {{ .Values.splunk_hec.token | quote }}
     index: {{ .Values.splunk_hec.index | quote }}

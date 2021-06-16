@@ -8,9 +8,9 @@ fullnameOverride: ""
 # Splunk HEC configuration
 splunk_hec:
   # Required. URL to a Splunk instance to send data to. ie) "http://X.X.X.X:8088/services/collector"
-  endpoint:
+  endpoint: "https://host.docker.internal:8088/services/collector"
   # Required. Splunk HTTP Event Collector token.
-  token:
+  token: "dd83f8e8-3d9a-4116-a59c-1a2fd99f7dce"
   # Optional. Name of the Splunk index targeted.
   index:
   # Optional. Default value for `source` field.
