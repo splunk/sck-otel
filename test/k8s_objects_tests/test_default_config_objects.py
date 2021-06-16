@@ -23,7 +23,7 @@ def test_k8s_objects(setup, test_input, expected):
     '''
     logging.getLogger().info("testing test_splunk_index input={0} \
                  expected={1} event(s)".format(test_input, expected))
-    index_objects = os.environ["CI_INDEX_OBJECTS"] if os.environ["CI_INDEX_OBJECTS"] else "circleci_objects"
+    index_objects = os.environ["CI_INDEX_OBJECTS"] if os.environ["CI_INDEX_OBJECTS"] else "ci_objects"
     search_query = "index=" + index_objects
     events = check_events_from_splunk(start_time="-1h@h",
                                       url=setup["splunkd_url"],
@@ -48,7 +48,7 @@ def test_k8s_objects_sourcetype(setup, test_input, expected):
     '''
     logging.getLogger().info("testing for presence of sourcetype={0} \
                 expected={1} event(s)".format(test_input, expected))
-    index_objects = os.environ["CI_INDEX_OBJECTS"] if os.environ["CI_INDEX_OBJECTS"] else "circleci_objects"
+    index_objects = os.environ["CI_INDEX_OBJECTS"] if os.environ["CI_INDEX_OBJECTS"] else "ci_objects"
     source_type = ' sourcetype=""' if test_input == "empty_sourcetype" else ' sourcetype=' + test_input
     search_query = "index=" + index_objects + source_type
     events = check_events_from_splunk(start_time="-24h@h",
@@ -71,7 +71,7 @@ def test_k8s_objects_host(setup, test_input, expected):
     '''
     logging.getLogger().info("testing for presence of host={0} \
                 expected={1} event(s)".format(test_input, expected))
-    index_objects = os.environ["CI_INDEX_OBJECTS"] if os.environ["CI_INDEX_OBJECTS"] else "circleci_objects"
+    index_objects = os.environ["CI_INDEX_OBJECTS"] if os.environ["CI_INDEX_OBJECTS"] else "ci_objects"
     host = ' host!=""' if test_input == "dummy_host" else ' host=""'
     search_query = "index=" + index_objects + host
     events = check_events_from_splunk(start_time="-24h@h",
@@ -94,7 +94,7 @@ def test_k8s_objects_source(setup, test_input, expected):
     '''
     logging.getLogger().info("testing for presence of source={0} \
                 expected={1} event(s)".format(test_input, expected))
-    index_objects = os.environ["CI_INDEX_OBJECTS"] if os.environ["CI_INDEX_OBJECTS"] else "circleci_objects"
+    index_objects = os.environ["CI_INDEX_OBJECTS"] if os.environ["CI_INDEX_OBJECTS"] else "ci_objects"
     source = ' source!=""' if test_input == "dummy_source" else ' source=""'
     search_query = "index=" + index_objects + source
     events = check_events_from_splunk(start_time="-24h@h",
@@ -108,7 +108,7 @@ def test_k8s_objects_source(setup, test_input, expected):
 
 @pytest.mark.skipif(True, reason="Not implemented")
 @pytest.mark.parametrize("test_input,expected", [
-    ("circleci-k8s-cluster-objects", 1)
+    ("ci-k8s-cluster-objects", 1)
 ])
 def test_cluster_name(setup, test_input, expected):
     '''
@@ -116,7 +116,7 @@ def test_cluster_name(setup, test_input, expected):
     '''
     logging.getLogger().info("testing for presence of cluster_name input={0} \
                 expected={1} event(s)".format(test_input, expected))
-    index_objects = os.environ["CI_INDEX_OBJECTS"] if os.environ["CI_INDEX_OBJECTS"] else "circleci_objects"
+    index_objects = os.environ["CI_INDEX_OBJECTS"] if os.environ["CI_INDEX_OBJECTS"] else "ci_objects"
     search_query = "index=" + index_objects + " cluster_name::" + test_input
     events = check_events_from_splunk(start_time="-1h@h",
                                   url=setup["splunkd_url"],

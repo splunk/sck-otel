@@ -64,11 +64,11 @@ containers:
   listOfLabels:
     - key: app
 
-customMetadata: 
-  cluster_name: circleci-k8s-cluster
+customMetadata:
+  cluster_name: ci-k8s-cluster
   customfield1: customvalue1
   customfield2: customvalue2
-  
+
 image:
   repository: otel/opentelemetry-collector-contrib
   pullPolicy: IfNotPresent

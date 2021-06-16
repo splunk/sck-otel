@@ -64,7 +64,7 @@ def test_metric_name(setup, metric):
     This test covers one metric from each endpoint that the metrics plugin covers
     '''
     logging.info("testing for presence of metric={0}".format(metric))
-    index_metrics = os.environ["CI_INDEX_METRICS"] if os.environ["CI_INDEX_METRICS"] else "circleci_metrics"
+    index_metrics = os.environ["CI_INDEX_METRICS"] if os.environ["CI_INDEX_METRICS"] else "ci_metrics"
     events = check_metrics_from_splunk(start_time="-24h@h",
                                   end_time="now",
                                   url=setup["splunkd_url"],
