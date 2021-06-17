@@ -181,7 +181,6 @@ receivers:
           k8s.namespace.name: 'EXPR($.namespace)'
           k8s.pod.name: 'EXPR($.pod_name)'
           com.splunk.sourcetype: 'EXPR("kube:container:"+$.container_name)'
-
       {{- if .Values.containers.multilineSupportConfig }}
       - type: router
         routes:
@@ -189,6 +188,7 @@ receivers:
         - output: {{ .containerName | quote }}
           expr: '($.container_name) == {{ .containerName | quote }}'
         {{- end }}
+        default: clean-up-log-record
       {{- range $.Values.containers.multilineSupportConfig }}
       - type: recombine
         id: {{.containerName | quote }}
@@ -197,7 +197,6 @@ receivers:
         is_first_entry: '($.log) matches {{ .first_entry_regex | quote }}'
       {{- end }}
       {{- end }}
-
       # Clean up log record
       - type: restructure
         id: clean-up-log-record
