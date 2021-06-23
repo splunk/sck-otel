@@ -92,7 +92,7 @@ exporters:
 {{- define "opentelemetry-collector.agent.containerLogsConfig" -}}
 extensions:
   health_check: {}
-  file_storage: 
+  file_storage:
     directory: /var/lib/otel_pos
 receivers:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver
@@ -111,7 +111,7 @@ receivers:
     include_file_name: false
     poll_interval: 200ms
     {{- if .Values.customMetadata }}
-    resource: 
+    resource:
       {{- toYaml .Values.customMetadata | nindent 6 }}
     {{- end }}
     max_concurrent_files: 1024
@@ -208,11 +208,11 @@ receivers:
   {{- toYaml .Values.extraHostFileConfig | nindent 2 }}
   {{- end }}
 processors:
-  batch: 
+  batch:
     send_batch_size: {{ .Values.batch.send_batch_size | default 8192 }}
     timeout: {{ .Values.batch.timeout | quote | default "200ms" }}
     send_batch_max_size: {{ .Values.batch.send_batch_max_size | default 0 }}
-  memory_limiter: 
+  memory_limiter:
     {{ include "opentelemetry-collector.memoryLimiter" . | nindent 4 }}
   {{- if .Values.containers.enrichK8sMetadata }}
   k8s_tagger:
@@ -234,6 +234,7 @@ processors:
         {{- toYaml .Values.containers.listOfLabels | nindent 8 }}
     filter:
       node_from_env_var: KUBE_NODE_NAME
+  {{- end }}
   resource/splunk:
     attributes:
     - key: host.name
@@ -248,10 +249,27 @@ processors:
     - key: com.splunk.index
       from_attribute: k8s.pod.annotations.splunk.com/index
       action: upsert
-{{- end }}
 exporters:
-  splunk_hec: 
-    {{- toYaml .Values.splunk_hec | nindent 4 }}
+  splunk_hec:
+    endpoint: {{ .Values.splunk_hec.endpoint | quote }}
+    token: {{ .Values.splunk_hec.token | quote }}
+    index: {{ .Values.splunk_hec.index | quote }}
+    source: {{ .Values.splunk_hec.source | quote }}
+    sourcetype: {{ .Values.splunk_hec.sourcetype | quote }}
+    max_connections: {{ .Values.splunk_hec.max_connections }}
+    disable_compression: {{ .Values.splunk_hec.disable_compression }}
+    timeout: {{ .Values.splunk_hec.timeout }}
+    insecure: {{ .Values.splunk_hec.insecure }}
+    insecure_skip_verify: {{ .Values.splunk_hec.insecure_skip_verify }}
+    {{- if .Values.splunk_hec.clientCert }}
+    cert_file: /otel/etc/hec_client_cert
+    {{- end }}
+    {{- if .Values.splunk_hec.clientKey  }}
+    key_file: /otel/etc/hec_client_key
+    {{- end }}
+    {{- if .Values.splunk_hec.caFile }}
+    ca_file: /otel/etc/hec_ca_file
+    {{- end }}
 service:
   extensions:
     - health_check

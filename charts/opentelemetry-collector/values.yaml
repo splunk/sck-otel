@@ -24,7 +24,7 @@ splunk_hec:
   # HTTP timeout when sending data. Defaults to 10s.
   timeout: 10s
   # Whether to skip checking the certificate of the HEC endpoint when sending data over HTTPS. Defaults to true.
-  insecure_skip_verify: true
+  insecure_skip_verify: false
   # The PEM-format CA certificate for this client.
   # NOTE: The content of the certificate itself should be used here, not the file path.
   #       The certificate will be stored as a secret in kubernetes.
