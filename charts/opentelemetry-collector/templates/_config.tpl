@@ -259,6 +259,7 @@ exporters:
     max_connections: {{ .Values.splunk_hec.max_connections }}
     disable_compression: {{ .Values.splunk_hec.disable_compression }}
     timeout: {{ .Values.splunk_hec.timeout }}
+    insecure: {{ .Values.splunk_hec.insecure }}
     insecure_skip_verify: {{ .Values.splunk_hec.insecure_skip_verify }}
     {{- if .Values.splunk_hec.clientCert }}
     cert_file: /otel/etc/hec_client_cert
@@ -269,7 +270,6 @@ exporters:
     {{- if .Values.splunk_hec.caFile }}
     ca_file: /otel/etc/hec_ca_file
     {{- end }}
-    server_name_override: host.docker.internal
 service:
   extensions:
     - health_check
