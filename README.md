@@ -158,6 +158,11 @@ If you want to tweak performance/cpu and memory resources used by  Splunk Connec
 Splunk Connect for Kubernetes-OpenTelemetry is supported through Splunk Support assuming the customer has a current Splunk support entitlement ([Splunk Support](https://www.splunk.com/en_us/about-splunk/contact-us.html#tabs/tab_parsys_tabs_CustomerSupport_4)). For customers that do not have a current Splunk support entitlement, please search [open and closed issues](https://github.com/splunk/sck-otel/issues?q=is%3Aissue) and create a new issue if not already there.
 The current maintainers of this project are the DataEdge team at Splunk.
 
+# Contributing
+We welcome feedback and contributions from the community! Please see our ([contribution guidelines](https://github.com/splunk/sck-otel/blob/main/CONTRIBUTING.md)) for more information on how to get involved. PR contributions require acceptance of both the code of conduct and the contributor license agreement.
+
+
+
 
 # License
 
