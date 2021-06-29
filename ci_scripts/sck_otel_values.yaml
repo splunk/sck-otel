@@ -63,7 +63,9 @@ containers:
       tag_name: customField
   listOfLabels:
     - key: app
-
+      from: pod
+    - key: app
+      from: namespace
 customMetadata:
   cluster_name: ci-k8s-cluster
   customfield1: customvalue1
