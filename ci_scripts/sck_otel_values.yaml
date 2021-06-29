@@ -61,6 +61,10 @@ containers:
     - key: splunk.com/exclude
     - key: splunk.com/customField
       tag_name: customField
+    - key: splunk.com/index
+      from: namespace
+    - key: splunk.com/exclude
+      from: namespace
   listOfLabels:
     - key: app
       from: pod
