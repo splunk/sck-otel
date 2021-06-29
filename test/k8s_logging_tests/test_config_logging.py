@@ -51,7 +51,10 @@ def test_label_collection(setup, label, index, expected):
     '''
     logger.info("testing label_app label={0} index={1} expected={2} event(s)".format(
         label, index, expected))
-    search_query = "index=" + index + " k8s.pod.labels.app::" + label
+    metadata_prefix = " k8s.pod.labels.app::"
+    if index == "ns-anno":
+        metadata_prefix = " k8s.namespace.labels.app::"
+    search_query = "index=" + index + metadata_prefix + label
     events = check_events_from_splunk(start_time="-1h@h",
                                       url=setup["splunkd_url"],
                                       user=setup["splunk_user"],
@@ -263,7 +266,10 @@ def test_custom_metadata_fields_annotations(setup, label, index, value, expected
     '''
     logger.info("testing custom metadata annotation label={0} value={1} expected={2} event(s)".format(
         label, value, expected))
-    search_query = "index=" + index + " k8s.pod.labels.app::" + label + " customField::" + value
+    metadata_prefix = " k8s.pod.labels.app::"
+    if index == "ns-anno":
+        metadata_prefix = " k8s.namespace.labels.app::"
+    search_query = "index=" + index + metadata_prefix + label + " customField::" + value
 
     events = check_events_from_splunk(start_time="-1h@h",
                                       url=setup["splunkd_url"],
