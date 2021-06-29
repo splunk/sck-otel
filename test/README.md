@@ -54,7 +54,7 @@
     --set splunk_hec.token=a6b5e77f-d5f6-415a-bd43-930cecb12959 \
     --set splunk_hec.endpoint=https://$SPLUNK_HOST:8088/services/collector \
     --set containers.containerRuntime=$CONTAINER_RUNTIME \
-    -f ci_scripts/sck_otel_values.yaml charts/opentelemetry-collector/
+    -f ci_scripts/sck_otel_values.yaml charts/sck-otel/
 
 #### Deploy log generator
     # Use test/test_setup.yaml file to deploy log generator

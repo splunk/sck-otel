@@ -83,7 +83,7 @@ containers:
         readOnly: true
       {{- end }}
       - name: checkpoint
-        mountPath: /var/lib/otel_pos
+        mountPath: {{ .Values.checkpointPath }}
       {{- if or .Values.splunk_hec.clientCert .Values.splunk_hec.clientKey .Values.splunk_hec.caFile }}
       - name: secret
         mountPath: /otel/etc

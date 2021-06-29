@@ -1,9 +1,9 @@
 apiVersion: v2
-name: opentelemetry-collector
+name: sck-otel
 version: 0.1.0
 description: Helm chart for Splunk with Open Telemetry Agent
 type: application
-home: https://opentelemetry.io/
+home: https://github.com/splunk/sck-otel
 sources:
   - https://github.com/open-telemetry/opentelemetry-collector
   - https://github.com/open-telemetry/opentelemetry-collector-contrib

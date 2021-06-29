@@ -8,9 +8,7 @@ Splunk Connect for Kubernetes-OpenTelemetry provides a way to import and search 
 * Openshift
 * and many others!
 
-
 Splunk Inc. is a proud contributor to the Cloud Native Computing Foundation (CNCF). Splunk Connect for Kubernetes-OpenTelemetry utilizes and supports multiple CNCF components in the development of these tools to get data into Splunk.
-
 
 ## Prerequisites
 
@@ -23,8 +21,8 @@ Splunk Inc. is a proud contributor to the Cloud Native Computing Foundation (CNC
 * A minimum of one Splunk platform indexes ready to collect the log data. This index will be used for ingesting logs.
 * (Optional) To install using Helm (best practice), verify you are running Helm version 3.0 or above in your Kubernetes configuration. See https://github.com/kubernetes/helm for more information.
 
+## Setup Splunk
 
-## Before you begin
 Splunk Connect for Kubernetes-OpenTelemetry supports installation using Helm. Read the Prerequisites and Installation and Deployment documentation before you start your deployment of Splunk Connect for Kubernetes-OpenTelemetry.
 
 Perform the following steps before you install:
@@ -34,6 +32,50 @@ If you do not configure this index, Splunk Connect for Kubernetes-OpenTelemetry 
 
 2. Create a HEC token if you do not already have one. If you are installing the connector on Splunk Cloud, file a ticket with Splunk Customer Service and they will deploy the indexes for your environment, and generate your HEC token.
 
+## Setup for Non-Root User Group
+
+It is best practice to run pods as a non-root user. To avoid running collector pod as `root` user, perform below steps on each kubernetes nodes.
+
+In this chart, it is set to run as as a user with UID and GID of `10001` ([set here](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml#L104)). But this user does not have the permission to read container log files typically owned by `root`. Below steps create a user with GID 10001 and grant access to that GID. 
+
+```bash
+# create a user otel with uid=10001 and gid=10001
+sudo adduser --disabled-password --uid 10001 --no-create-home otel
+
+# setup a directory for storing checkpoints
+sudo mkdir /var/lib/otel_pos
+sudo chgrp otel /var/lib/otel_pos
+sudo chmod g+rwx /var/lib/otel_pos
+
+# setup container log directories. 
+# To check where the files are, check symlinks file on `/var/log/pods/` and its target paths.
+ls -Rl /var/log/pods
+# default paths are these
+# `/var/lib/docker/containers` for docker 
+# `/var/log/crio/pods` for cri-o
+# `/var/log/pods` for containerd
+# add your container log path if different
+if [ -d "/var/lib/docker/containers" ] 
+then
+    sudo chgrp -R otel /var/lib/docker/containers
+    sudo chmod -R g+rwx /var/lib/docker/containers
+    sudo setfacl -Rm d:g:otel:rwx,g:otel:rwx /var/lib/docker/containers
+fi
+
+if [ -d "/var/log/crio/pods" ] 
+then
+    sudo chgrp -R otel /var/log/crio/pods
+    sudo chmod -R g+rwx /var/log/crio/pods
+    sudo setfacl -Rm d:g:otel:rwx,g:otel:rwx /var/log/crio/pods
+fi
+
+if [ -d "/var/log/pods" ] 
+then
+    sudo chgrp -R otel /var/log/pods
+    sudo chmod -R g+rwx /var/log/pods
+    sudo setfacl -Rm d:g:otel:rwx,g:otel:rwx /var/log/pods
+fi
+```
 
 ## Deploy with Helm 3.0+
 
@@ -43,19 +85,19 @@ To install and configure defaults with Helm:
 
 * Add Splunk chart repo
 ```bash
-helm repo add splunk https://splunk.github.io/sck-otel/
+helm repo add splunk-otel https://splunk.github.io/sck-otel/
 ```
 
 * Get values file in your working directory
 
 ```bash
-helm show values splunk/sck-otel > values.yaml
+helm show values splunk-otel/sck-otel > values.yaml
 ```
 
-* Prepare this Values file. This file has a lot of documentation for configuring Splunk Connect for Kubernetes-OpenTelemetry. Look at this [example](https://github.com/splunk/sck-otel/blob/main/charts/opentelemetry-collector/values.yaml). Once you have a Values file, you can simply install the chart with by running
+* Prepare this Values file. This file has a lot of documentation for configuring Splunk Connect for Kubernetes-OpenTelemetry. Look at this [example](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml). Once you have a Values file, you can simply install the chart with by running
 
 ```bash
-helm install my-splunk-connect -f my_values.yaml splunk/sck-otel
+helm install my-splunk-connect -f my_values.yaml splunk-otel/sck-otel
 ```
 
 To learn more about using and modifying charts, see:
@@ -65,7 +107,7 @@ To learn more about using and modifying charts, see:
 
 ## Configuration variables for Helm
 
-The default values file can be found here [default values file](https://github.com/splunk/sck-otel/blob/main/charts/opentelemetry-collector/values.yaml)
+The default values file can be found here [default values file](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml)
 
 
 # Architecture
@@ -124,7 +166,7 @@ For more information on index time field extraction please view this [guide](htt
 
 Select the proper container runtime for your Kubernetes distribution.
 
-[Example](https://github.com/splunk/sck-otel/blob/main/charts/opentelemetry-collector/values.yaml#L47)
+[Example](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml#L47)
 
 
 ## Add log files from Kubernetes host machines/volumes
@@ -140,7 +182,7 @@ If you want to use your own OpenTelemetry Agent configuration, you can build a [
 ## Adding Audit logs from Kubernetes host machines
 You can ingest audit logs from your Kubernetes cluster by configuring extraHostPathMounts and extraHostFileConfig in the values.yaml file used to deploy Splunk Connect for Kubernetes-OpenTelemetry.
 
-[Example](https://github.com/splunk/sck-otel/blob/main/charts/opentelemetry-collector/values.yaml#L122)
+[Example](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml#L122)
 
 ## Processing Multi-Line Logs
 
@@ -151,7 +193,7 @@ TBD
 
 If you want to tweak performance/cpu and memory resources used by  Splunk Connect for Kubernetes-OpenTelemetry change the available cpu and memory for the Opentelemtry Agent by configuring resources:limits:cpu and resources:limits:memory in the values.yaml file used to deploy Splunk Connect for Kubernetes-OpenTelemetry.
 
-[Example](https://github.com/splunk/sck-otel/blob/main/charts/opentelemetry-collector/values.yaml#L143)
+[Example](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml#L143)
 
 
 # Maintenance And Support
