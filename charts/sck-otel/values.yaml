@@ -61,8 +61,15 @@ containers:
   # List of annotation and label fields to enrich with
   listOfAnnotations:
     - key: splunk.com/index
+      from: pod
     - key: splunk.com/sourcetype
+      from: pod
     - key: splunk.com/exclude
+      from: pod
+    - key: splunk.com/index
+      from: namespace
+    - key: splunk.com/exclude
+      from: namespace
   listOfLabels:
     - key: app
   multilineSupportConfig: []

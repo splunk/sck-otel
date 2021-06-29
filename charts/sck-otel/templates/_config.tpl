@@ -223,11 +223,13 @@ processors:
         name: k8s.pod.uid
     extract:
       metadata:
-        - deployment
-        - cluster
-        - namespace
-        - node
-        - startTime
+        - k8s.pod.name
+        - k8s.pod.uid
+        - k8s.deployment.name
+        - k8s.cluster.name
+        - k8s.namespace.name
+        - k8s.node.name
+        - k8s.pod.start_time
       annotations:
         {{- toYaml .Values.containers.listOfAnnotations | nindent 8 }}
       labels:
