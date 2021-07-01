@@ -34,7 +34,7 @@
     curl -X POST -u admin:helloworld -k https://localhost:8089/servicesNS/nobody/splunk_httpinput/data/inputs/http/http/enable
     
     # Create new HEC token
-    curl -X POST -u admin:helloworld -k -d "name=splunk_hec_token&token=a6b5e77f-d5f6-415a-bd43-930cecb12959&disabled=0&index=main&indexes=main,circleci_events,ns-anno,pod-anno" https://localhost:8089/servicesNS/nobody/splunk_httpinput/data/inputs/http
+    curl -X POST -u admin:helloworld -k -d "name=splunk_hec_token&token=a6b5e77f-d5f6-415a-bd43-930cecb12959&disabled=0&index=main&indexes=main,ci_events,ns-anno,pod-anno" https://localhost:8089/servicesNS/nobody/splunk_httpinput/data/inputs/http
     
     # Restart Splunk
     curl -k -u admin:helloworld https://localhost:8089/services/server/control/restart -X POST
@@ -69,11 +69,12 @@
 2. Install the dependencies 
     ```
     pip install -r requirements.txt
+    export PYTHONWARNINGS="ignore:Unverified HTTPS request"
     ```  
 3. Start the test with the required options configured 
     ``` 
-    python -m pytest \  
-    --splunkd-url https://localhost:8089 \  
+    python -m pytest \
+    --splunkd-url https://localhost:8089 \
     --splunk-user admin --splunk-password helloworld \
     -p no:warnings -s
     ```

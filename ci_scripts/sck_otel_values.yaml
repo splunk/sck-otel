@@ -65,9 +65,6 @@ containers:
       from: namespace
     - key: splunk.com/exclude
       from: namespace
-    - key: splunk.com/customField
-      tag_name: customField
-      from: namespace
   listOfLabels:
     - key: app
       from: pod
@@ -79,10 +76,10 @@ customMetadata:
   customfield2: customvalue2
 
 image:
-  repository: otel/opentelemetry-collector-contrib
+  repository: rock1017/otelcontribcol
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "0.30.0"
 imagePullSecrets: []
 
 # OpenTelemetry Collector executable

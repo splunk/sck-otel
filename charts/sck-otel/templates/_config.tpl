@@ -165,12 +165,12 @@ receivers:
       - type: metadata
         id: filename
         resource:
-          service.name: EXPR($$attributes.file_path)
+          service.name: EXPR($$attributes["file.path"])
       # Extract metadata from file path
       - type: regex_parser
         id: extract_metadata_from_filepath
         regex: '^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<run_id>\d+)\.log$'
-        parse_from: $$attributes.file_path
+        parse_from: $$attributes["file.path"]
       # Move out attributes to Attributes
       - type: metadata
         resource:

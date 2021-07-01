@@ -20,16 +20,13 @@ metadata:
     splunk.com/index: ns-anno
     splunk.com/exclude: "true"
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: pod-w-index-w-ns-index
   namespace: ns-w-index
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: pod-w-index-w-ns-index
+  parallelism: 1
   template:
     metadata:
       labels:
@@ -39,22 +36,25 @@ spec:
         splunk.com/sourcetype: "sourcetype-anno"
         splunk.com/customField: pod-value-1
     spec:
+      restartPolicy: Never
       containers:
       - name: pod-w-index-w-ns-index
         image: rock1017/log-generator:2.2.4
-        args:
-          - "1"
+        env:
+        - name: MESSAGE_COUNT
+          value: "10"
+        - name: SIZE
+          value: "256"
+        - name: FREQ
+          value: "1"
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: pod-wo-index-w-ns-index
   namespace: ns-w-index
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: pod-wo-index-w-ns-index
+  parallelism: 1
   template:
     metadata:
       labels:
@@ -62,22 +62,25 @@ spec:
       annotations:
         splunk.com/exclude: "false"
     spec:
+      restartPolicy: Never
       containers:
       - name: pod-wo-index-w-ns-index
         image: rock1017/log-generator:2.2.4
-        args:
-          - "1"
+        env:
+        - name: MESSAGE_COUNT
+          value: "10"
+        - name: SIZE
+          value: "256"
+        - name: FREQ
+          value: "1"
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: pod-w-index-wo-ns-index
   namespace: ns-wo-index
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: pod-w-index-wo-ns-index
+  parallelism: 1
   template:
     metadata:
       labels:
@@ -86,22 +89,25 @@ spec:
         splunk.com/index: "pod-anno"
         splunk.com/customField: pod-value-2
     spec:
+      restartPolicy: Never
       containers:
       - name: pod-w-index-wo-ns-index
         image: rock1017/log-generator:2.2.4
-        args:
-          - "1"
+        env:
+        - name: MESSAGE_COUNT
+          value: "10"
+        - name: SIZE
+          value: "256"
+        - name: FREQ
+          value: "1"
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: pod-w-index-w-ns-exclude
   namespace: ns-w-exclude
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: pod-w-index-w-ns-exclude
+  parallelism: 1
   template:
     metadata:
       labels:
@@ -109,22 +115,25 @@ spec:
       annotations:
         splunk.com/index: "pod-anno"
     spec:
+      restartPolicy: Never
       containers:
       - name: pod-w-index-w-ns-exclude
         image: rock1017/log-generator:2.2.4
-        args:
-          - "1"
+        env:
+        - name: MESSAGE_COUNT
+          value: "10"
+        - name: SIZE
+          value: "256"
+        - name: FREQ
+          value: "1"
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: pod-w-exclude-wo-ns-exclude
   namespace: ns-w-index
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: pod-w-index-w-ns-exclude
+  parallelism: 1
   template:
     metadata:
       labels:
@@ -132,29 +141,38 @@ spec:
       annotations:
         splunk.com/exclude: "true"
     spec:
+      restartPolicy: Never
       containers:
       - name: pod-w-index-w-ns-exclude
         image: rock1017/log-generator:2.2.4
-        args:
-          - "1"
+        env:
+        - name: MESSAGE_COUNT
+          value: "10"
+        - name: SIZE
+          value: "256"
+        - name: FREQ
+          value: "1"
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: pod-wo-index-wo-ns-index
   namespace: ns-wo-index
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: pod-wo-index-wo-ns-index
+  parallelism: 1
   template:
     metadata:
       labels:
         app: pod-wo-index-wo-ns-index
     spec:
+      restartPolicy: Never
       containers:
       - name: pod-wo-index-wo-ns-index
         image: rock1017/log-generator:2.2.4
-        args:
-          - "1"
+        env:
+        - name: MESSAGE_COUNT
+          value: "10"
+        - name: SIZE
+          value: "256"
+        - name: FREQ
+          value: "1"

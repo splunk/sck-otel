@@ -63,20 +63,20 @@ def test_label_collection(setup, label, index, expected):
     assert len(events) >= expected
 
 
-@pytest.mark.parametrize("container_name,expected", [
-    ("pod-w-index-w-ns-index", 1),
-    ("pod-wo-index-w-ns-index", 1),
-    ("pod-w-index-wo-ns-index", 1),
-    ("pod-wo-index-wo-ns-index", 1),
+@pytest.mark.parametrize("index,container_name,expected", [
+    ("pod-anno", "pod-w-index-w-ns-index", 1),
+    ("ns-anno", "pod-wo-index-w-ns-index", 1),
+    ("pod-anno", "pod-w-index-wo-ns-index", 1),
+    ("ci_events", "pod-wo-index-wo-ns-index", 1),
 ])
-def test_annotation_routing(setup, container_name, expected):
+def test_annotation_routing(setup, index, container_name, expected):
     '''
     Test annotation routing feature. it tests different combinations of
     namespace annotations and pod annotations.
     '''
     logger.info("testing test_annotation_routing pod={0} expected={1} event(s)".format(
         container_name, expected))
-    search_query = "index=* container_name::" + container_name
+    search_query = "index=" + index + " container_name::" + container_name
     events = check_events_from_splunk(start_time="-1h@h",
                                       url=setup["splunkd_url"],
                                       user=setup["splunk_user"],
@@ -252,7 +252,7 @@ def test_custom_metadata_fields(setup, field,value, expected):
 
 @pytest.mark.parametrize("label,index,value,expected", [
     ("pod-w-index-wo-ns-index", "pod-anno", "pod-value-2", 1),
-    ("pod-wo-index-w-ns-index", "ns-anno", "ns-value", 1),
+    # ("pod-wo-index-w-ns-index", "ns-anno", "ns-value", 1),
     ("pod-w-index-w-ns-index", "pod-anno", "pod-value-1", 1)
 ])
 def test_custom_metadata_fields_annotations(setup, label, index, value, expected):
