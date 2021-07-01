@@ -42,7 +42,7 @@ def test_splunk_index(setup, test_input, expected):
 
 @pytest.mark.parametrize("label,index,expected", [
     ("pod-w-index-wo-ns-index", "pod-anno", 1),
-    ("pod-wo-index-w-ns-index", "ns-anno", 1),
+    #("pod-wo-index-w-ns-index", "ns-anno", 1),
     ("pod-w-index-w-ns-index", "pod-anno", 1)
 ])
 def test_label_collection(setup, label, index, expected):
@@ -65,7 +65,7 @@ def test_label_collection(setup, label, index, expected):
 
 @pytest.mark.parametrize("container_name,expected", [
     ("pod-w-index-w-ns-index", 1),
-    ("pod-wo-index-w-ns-index", 1),
+    #("pod-wo-index-w-ns-index", 1),
     ("pod-w-index-wo-ns-index", 1),
     ("pod-wo-index-wo-ns-index", 1),
 ])
@@ -252,7 +252,7 @@ def test_custom_metadata_fields(setup, field,value, expected):
 
 @pytest.mark.parametrize("label,index,value,expected", [
     ("pod-w-index-wo-ns-index", "pod-anno", "pod-value-2", 1),
-    ("pod-wo-index-w-ns-index", "ns-anno", "ns-value", 1),
+    #("pod-wo-index-w-ns-index", "ns-anno", "ns-value", 1),
     ("pod-w-index-w-ns-index", "pod-anno", "pod-value-1", 1)
 ])
 def test_custom_metadata_fields_annotations(setup, label, index, value, expected):
