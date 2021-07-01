@@ -69,6 +69,7 @@
 2. Install the dependencies 
     ```
     pip install -r requirements.txt
+    export PYTHONWARNINGS="ignore:Unverified HTTPS request"
     ```  
 3. Start the test with the required options configured 
     ``` 
