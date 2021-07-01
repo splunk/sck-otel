@@ -69,14 +69,14 @@ def test_label_collection(setup, label, index, expected):
     ("pod-anno", "pod-w-index-wo-ns-index", 1),
     ("ci_events", "pod-wo-index-wo-ns-index", 1),
 ])
-def test_annotation_routing(setup, container_name, expected):
+def test_annotation_routing(setup, index, container_name, expected):
     '''
     Test annotation routing feature. it tests different combinations of
     namespace annotations and pod annotations.
     '''
     logger.info("testing test_annotation_routing pod={0} expected={1} event(s)".format(
         container_name, expected))
-    search_query = "index=" + index + container_name::" + container_name
+    search_query = "index=" + index + " container_name::" + container_name
     events = check_events_from_splunk(start_time="-1h@h",
                                       url=setup["splunkd_url"],
                                       user=setup["splunk_user"],
