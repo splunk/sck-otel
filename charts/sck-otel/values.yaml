@@ -51,7 +51,7 @@ containers:
   path: /var/log/pods/*/*/*.log
   # Paths of logfiles to exclude. object type is array:
   # i.e) to exclude `kube-system` namespace,
-  # exclude_paths: [ /var/log/pods/kube-system_.*.log ]
+  # exclude_paths: [ /var/log/pods/kube-system_*/*/*.log ]
   exclude_paths: []
   #  - /var/log/pods/kube-system_*.log (to exclude `kube-system` namespace)
   # Boolean for ingesting the agent's own log
