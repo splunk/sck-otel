@@ -89,11 +89,10 @@ batch:
   send_batch_max_size: 0
 
 image:
-  repository: rock1017/otelcontribcol
-  # repository: otel/opentelemetry-collector-contrib
+  repository: otel/opentelemetry-collector-contrib
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.30.0"
+  tag: ""
 imagePullSecrets: []
 
 # OpenTelemetry Collector executable
