@@ -97,7 +97,7 @@ extensions:
 receivers:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver
   filelog:
-    include: [ /var/log/pods/*/*/*.log ]
+    include: [ {{ .Values.containers.path }} ]
     # Exclude collector container's logs. The file format is /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<run_id>.log
     exclude:
       {{- if .Values.containers.excludeAgentLogs }}
