@@ -96,7 +96,7 @@ jobs:
       - name: Install Splunk
         run: |
           kubectl get nodes
-          # Install Splunk on minikube
+          # Install Splunk on minikube v1.22.0
           kubectl apply -f ci_scripts/k8s-splunk.yml
           # Wait until splunk is ready
           until kubectl logs splunk --tail=2 | grep -q 'Ansible playbook complete'; do
