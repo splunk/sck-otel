@@ -95,7 +95,10 @@ jobs:
 
       - name: Install Splunk
         run: |
-          n=0; until ((n >= 60)); do kubectl -n default get serviceaccount default -o name && break; n=$((n + 1)); sleep 1; done; ((n < 60))
+          # Wait until default service account is created
+          until kubectl -n default get serviceaccount default -o name; do
+            sleep 1;
+          done
           # Install Splunk on minikube
           kubectl apply -f ci_scripts/k8s-splunk.yml
           # Wait until splunk is ready
