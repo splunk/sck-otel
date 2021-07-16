@@ -50,6 +50,8 @@ containers:
   # The file format is /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<run_id>.log
   path: /var/log/pods/*/*/*.log
   # Paths of logfiles to exclude. object type is array:
+  # i.e) to exclude `kube-system` namespace,
+  # exclude_paths: [ /var/log/pods/kube-system_*/*/*.log ]
   exclude_paths: []
   #  - /var/log/pods/kube-system_*.log (to exclude `kube-system` namespace)
   # Boolean for ingesting the agent's own log
@@ -87,11 +89,10 @@ batch:
   send_batch_max_size: 0
 
 image:
-  repository: rock1017/otelcontribcol
-  # repository: otel/opentelemetry-collector-contrib
+  repository: otel/opentelemetry-collector-contrib
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.30.0"
+  tag: ""
 imagePullSecrets: []
 
 # OpenTelemetry Collector executable
