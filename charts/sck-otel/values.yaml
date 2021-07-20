@@ -74,7 +74,15 @@ containers:
       from: namespace
   listOfLabels:
     - key: app
+
   multilineSupportConfig: []
+#  Sample configuration for processing and handling multiline logs by specifying containerName and its first_entry_regex which is a regular expression to parse first entry in a multiline log series
+#  multilineSupportConfig:
+#    - containerName: <container-name-1>
+#      first_entry_regex: "<regular-expression>"
+#    - containerName: <container-name-2>
+#      first_entry_regex: "<regular-expression>"
+
 
 # List of key/value pairs for metadata purpose.
 # Can be used to define things such as cloud_account_id, cloud_account_region, etc.

@@ -168,7 +168,6 @@ Select the proper container runtime for your Kubernetes distribution.
 
 [Example](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml#L47)
 
-
 ## Add log files from Kubernetes host machines/volumes
 
 You can add additional log files to be ingested from Kubernetes host machines and kubernetes volumes by configuring extraHostPathMounts and extraHostFileConfig in the values.yaml file used to deploy Splunk Connect for Kubernetes-OpenTelemetry.
@@ -178,23 +177,21 @@ You can add additional log files to be ingested from Kubernetes host machines an
 ## Override underlying OpenTelemetry Agent configuration
 If you want to use your own OpenTelemetry Agent configuration, you can build a [OpenTelemetry Agent config](https://github.com/splunk/sck-otel/blob/main/example/manifests/otel_config.yaml) and override our default config by configuring configOverride in the values.yaml file used to deploy Splunk Connect for Kubernetes-OpenTelemetry.
 
-
 ## Adding Audit logs from Kubernetes host machines
 You can ingest audit logs from your Kubernetes cluster by configuring extraHostPathMounts and extraHostFileConfig in the values.yaml file used to deploy Splunk Connect for Kubernetes-OpenTelemetry.
 
 [Example](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml#L122)
 
 ## Processing Multi-Line Logs
+Splunk Connect for Kubernetes-OpenTelmetry supports parsing of multiline logs to help read, understand and troubleshoot the multiline logs in a better way.
+Process multiline logs by configuring `multilineSupportConfig` section in values.yaml.
 
-TBD
-
+[Example](https://github.com/splunk/sck-otel/blob/9bd92b9b2054b85eadfd744888cc19ebb46b0081/charts/sck-otel/values.yaml#L77)
 
 ## Tweak Performance/resources used by Splunk Connect for Kubernetes-OpenTelemetry
-
 If you want to tweak performance/cpu and memory resources used by  Splunk Connect for Kubernetes-OpenTelemetry change the available cpu and memory for the Opentelemtry Agent by configuring resources:limits:cpu and resources:limits:memory in the values.yaml file used to deploy Splunk Connect for Kubernetes-OpenTelemetry.
 
 [Example](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml#L143)
-
 
 # Maintenance And Support
 Splunk Connect for Kubernetes-OpenTelemetry is supported through Splunk Support assuming the customer has a current Splunk support entitlement ([Splunk Support](https://www.splunk.com/en_us/about-splunk/contact-us.html#tabs/tab_parsys_tabs_CustomerSupport_4)). For customers that do not have a current Splunk support entitlement, please search [open and closed issues](https://github.com/splunk/sck-otel/issues?q=is%3Aissue) and create a new issue if not already there.
@@ -202,9 +199,6 @@ The current maintainers of this project are the DataEdge team at Splunk.
 
 # Contributing
 We welcome feedback and contributions from the community! Please see our ([contribution guidelines](https://github.com/splunk/sck-otel/blob/main/CONTRIBUTING.md)) for more information on how to get involved. PR contributions require acceptance of both the code of conduct and the contributor license agreement.
-
-
-
 
 # License
 
