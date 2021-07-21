@@ -76,12 +76,22 @@ containers:
     - key: app
 
   multilineSupportConfig: []
-#  Sample configuration for processing and handling multiline logs by specifying containerName and its first_entry_regex which is a regular expression to parse first entry in a multiline log series
+#  Example configuration for processing and handling multiline logs/ java stack trace from test container "buttercup-app" by specifying  a regular expression (first_entry_regex) to parse first entry in a multiline log series.
+
+#  Sample java stack trace/ multiline log from container "buttercup-app"
+#  .........
+#  Exception in thread "main" java.lang.NumberFormatException: For input string: "3.1415"
+#      at java.lang.NumberFormatException.forInputString(NumberFormatException.java:65)
+#      at java.lang.Integer.parseInt(Integer.java:580)
+#      at ExampleCli.parseNumericArgument(ExampleCli.java:47)
+#      at ExampleCli.parseCliOptions(ExampleCli.java:27)
+#      at ExampleCli.main(ExampleCli.java:11)
+#  .........
+
+#  Sample configuration to handle multiline java stack trace from buttercup-app container
 #  multilineSupportConfig:
-#    - containerName: <container-name-1>
-#      first_entry_regex: "<regular-expression>"
-#    - containerName: <container-name-2>
-#      first_entry_regex: "<regular-expression>"
+#    - containerName: buttercup-app
+#      first_entry_regex: "^.+Exception[^\n]++(\s+at.*)+"
 
 
 # List of key/value pairs for metadata purpose.
