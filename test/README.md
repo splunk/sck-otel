@@ -59,7 +59,10 @@
 #### Deploy log generator
     # Use test/test_setup.yaml file to deploy log generator
     kubectl apply -f test/test_setup.yaml
-
+#### Check data on Splunk
+    To see the test events generaged in Splunk, you can vistit Splunk web page: https://localhost:8000
+    Search for events by index. 
+    For example: `index=ci_events`
 ## Testing Instructions
 1. (Optional) Use a virtual environment for the test  
     ```
