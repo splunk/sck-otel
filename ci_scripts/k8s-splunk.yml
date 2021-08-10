@@ -29,3 +29,4 @@ spec:
       value: helloworld
     - name: SPLUNK_LAUNCH_CONF
       value: OPTIMISTIC_ABOUT_FILE_LOCKING=1
+      name

@@ -75,11 +75,6 @@ customMetadata:
   customfield1: customvalue1
   customfield2: customvalue2
 
-image:
-  repository: rock1017/otelcontribcol
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.30.0"
 imagePullSecrets: []
 
 # OpenTelemetry Collector executable
