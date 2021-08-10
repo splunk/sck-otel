@@ -119,7 +119,18 @@ receivers:
     fingerprint_size: 1kb
     max_log_size: 1MiB
     operators:
-      {{- if eq .Values.containers.containerRuntime "cri-o" }}
+      {{- if not .Values.containers.containerRuntime }}
+      - type: router
+        id: get-format
+        routes:
+          - output: parser-docker
+            expr: '$$body matches "^\\{"'
+          - output: parser-crio
+            expr: '$$body matches "^[^ Z]+ "'
+          - output: parser-containerd
+            expr: '$$body matches "^[^ Z]+Z"'
+      {{- end }}
+      {{- if or (not .Values.containers.containerRuntime) (eq .Values.containers.containerRuntime "cri-o") }}
       # Parse CRI-O format
       - type: regex_parser
         id: parser-crio
@@ -129,18 +140,18 @@ receivers:
           layout_type: gotime
           layout: '2006-01-02T15:04:05.000000000-07:00'
       - type: recombine
-        output: extract_metadata_from_filepath
         combine_field: log
         is_last_entry: "($.logtag) == 'F'"
       - type: restructure
         id: check for empty log
+        output: extract_metadata_from_filepath
         ops:
           - add:
               if: 'EXPR($.log) != nil'
               field: log
               value: ""
       {{- end }}
-      {{- if eq .Values.containers.containerRuntime "containerd" }}
+      {{- if or (not .Values.containers.containerRuntime) (eq .Values.containers.containerRuntime "cri-o") }}
       # Parse CRI-Containerd format
       - type: regex_parser
         id: parser-containerd
@@ -152,9 +163,17 @@ receivers:
         output: extract_metadata_from_filepath
         combine_field: log
         is_last_entry: "($.logtag) == 'F'"
+      - type: restructure
+        id: check for empty log
+        output: extract_metadata_from_filepath
+        ops:
+          - add:
+              if: 'EXPR($.log) != nil'
+              field: log
+              value: ""
       {{- end }}
+      {{- if or (not .Values.containers.containerRuntime) (eq .Values.containers.containerRuntime "docker") }}
       # Parse Docker format
-      {{- if eq .Values.containers.containerRuntime "docker" }}
       - type: json_parser
         id: parser-docker
         timestamp:
@@ -197,6 +216,7 @@ receivers:
         is_first_entry: '($.log) matches {{ .first_entry_regex | quote }}'
       {{- end }}
       {{- end }}
+      
       # Clean up log record
       - type: restructure
         id: clean-up-log-record
