@@ -140,6 +140,7 @@ receivers:
           layout_type: gotime
           layout: '2006-01-02T15:04:05.000000000-07:00'
       - type: recombine
+        id: crio-recombine
         combine_field: log
         is_last_entry: "($.logtag) == 'F'"
         # output: filename
@@ -161,6 +162,7 @@ receivers:
           parse_from: time
           layout: '%Y-%m-%dT%H:%M:%S.%LZ'
       - type: recombine
+        id: containerd-recombine
         output: filename
         combine_field: log
         is_last_entry: "($.logtag) == 'F'"
