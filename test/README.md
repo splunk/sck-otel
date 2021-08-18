@@ -48,7 +48,7 @@
     export SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
     
     # Use ci_scripts/sck_otel_values.yaml file to deploy sck otel connector
-    # Default image repository: otel/opentelemetry-collector-contrib    
+    # Default image repository: quay.io/signalfx/splunk-otel-collector    
     helm install sck-otel \
     --set splunk_hec.index=ci_events \
     --set splunk_hec.token=a6b5e77f-d5f6-415a-bd43-930cecb12959 \

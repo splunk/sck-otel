@@ -75,39 +75,8 @@ customMetadata:
   customfield1: customvalue1
   customfield2: customvalue2
 
-image:
-  repository: rock1017/otelcontribcol
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.30.0"
-imagePullSecrets: []
-
-# OpenTelemetry Collector executable
-command:
-  name: otelcontribcol
-  extraArgs: []
-
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
-
-podSecurityContext: {}
 securityContext:
   runAsUser: 0
-podAnnotations: {}
-
-nodeSelector: {}
-tolerations: []
-affinity: {}
-
-extraEnvs: []
-extraHostPathMounts: []
-secretMounts: []
 
 resources:
   limits:

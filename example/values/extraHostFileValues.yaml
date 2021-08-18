@@ -62,18 +62,6 @@ containers:
   listOfLabels:
     - key: app
 
-image:
-  repository: otel/opentelemetry-collector-contrib
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
-imagePullSecrets: []
-
-# OpenTelemetry Collector executable
-command:
-  name: otelcontribcol
-  extraArgs: []
-
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
