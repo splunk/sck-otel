@@ -107,7 +107,7 @@ batch:
   send_batch_max_size: 0
 
 image:
-  repository: otel/opentelemetry-collector-contrib
+  repository: quay.io/signalfx/splunk-otel-collector
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -115,7 +115,7 @@ imagePullSecrets: []
 
 # OpenTelemetry Collector executable
 command:
-  name: otelcontribcol
+  name: otelcol
   extraArgs: []
 
 serviceAccount:

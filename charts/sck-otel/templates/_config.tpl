@@ -124,11 +124,11 @@ receivers:
         id: get-format
         routes:
           - output: parser-docker
-            expr: '$$body matches "^\\{"'
+            expr: '$$$$body matches "^\\{"'
           - output: parser-crio
-            expr: '$$body matches "^[^ Z]+ "'
+            expr: '$$$$body matches "^[^ Z]+ "'
           - output: parser-containerd
-            expr: '$$body matches "^[^ Z]+Z"'
+            expr: '$$$$body matches "^[^ Z]+Z"'
       {{- end }}
       {{- if or (not .Values.containers.containerRuntime) (eq .Values.containers.containerRuntime "cri-o") }}
       # Parse CRI-O format
@@ -142,14 +142,14 @@ receivers:
       - type: recombine
         id: crio-recombine
         combine_field: log
-        is_last_entry: "($.logtag) == 'F'"
+        is_last_entry: "($$.logtag) == 'F'"
         # output: filename
       - type: restructure
         id: check for empty log
         output: filename
         ops:
           - add:
-              if: 'EXPR($.log) != nil'
+              if: 'EXPR($$.log) != nil'
               field: log
               value: "nil"
       {{- end }}
@@ -165,7 +165,7 @@ receivers:
         id: containerd-recombine
         output: filename
         combine_field: log
-        is_last_entry: "($.logtag) == 'F'"
+        is_last_entry: "($$.logtag) == 'F'"
       {{- end }}
       {{- if or (not .Values.containers.containerRuntime) (eq .Values.containers.containerRuntime "docker") }}
       # Parse Docker format
@@ -179,28 +179,28 @@ receivers:
       - type: metadata
         id: filename
         resource:
-          service.name: EXPR($$attributes["file.path"])
+          service.name: EXPR($$$$attributes["file.path"])
       # Extract metadata from file path
       - type: regex_parser
         id: extract_metadata_from_filepath
         regex: '^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<run_id>\d+)\.log$'
-        parse_from: $$attributes["file.path"]
+        parse_from: $$$$attributes["file.path"]
       # Move out attributes to Attributes
       - type: metadata
         resource:
-          k8s.pod.uid: 'EXPR($.uid)'
-          run_id: 'EXPR($.run_id)'
-          stream: 'EXPR($.stream)'
-          container_name: 'EXPR($.container_name)'
-          k8s.namespace.name: 'EXPR($.namespace)'
-          k8s.pod.name: 'EXPR($.pod_name)'
-          com.splunk.sourcetype: 'EXPR("kube:container:"+$.container_name)'
+          k8s.pod.uid: 'EXPR($$.uid)'
+          run_id: 'EXPR($$.run_id)'
+          stream: 'EXPR($$.stream)'
+          container_name: 'EXPR($$.container_name)'
+          k8s.namespace.name: 'EXPR($$.namespace)'
+          k8s.pod.name: 'EXPR($$.pod_name)'
+          com.splunk.sourcetype: 'EXPR("kube:container:"+$$.container_name)'
       {{- if .Values.containers.multilineSupportConfig }}
       - type: router
         routes:
         {{- range $.Values.containers.multilineSupportConfig }}
         - output: {{ .containerName | quote }}
-          expr: '($.container_name) == {{ .containerName | quote }}'
+          expr: '($$.container_name) == {{ .containerName | quote }}'
         {{- end }}
         default: clean-up-log-record
       {{- range $.Values.containers.multilineSupportConfig }}
@@ -208,7 +208,7 @@ receivers:
         id: {{.containerName | quote }}
         output: clean-up-log-record
         combine_field: log
-        is_first_entry: '($.log) matches {{ .first_entry_regex | quote }}'
+        is_first_entry: '($$.log) matches {{ .first_entry_regex | quote }}'
       {{- end }}
       {{- end }}
       
@@ -218,7 +218,7 @@ receivers:
         ops:
           - move:
               from: log
-              to: $
+              to: $$
   {{- if .Values.extraHostFileConfig }}
   {{- toYaml .Values.extraHostFileConfig | nindent 2 }}
   {{- end }}
