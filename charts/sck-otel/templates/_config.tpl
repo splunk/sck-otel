@@ -6,13 +6,9 @@ Default memory limiter configuration for OpenTelemetry Collector based on k8s re
 check_interval: 5s
 
 # By default limit_mib is set to 80% of ".Values.resources.limits.memory"
-limit_mib: {{ include "opentelemetry-collector.getMemLimitMib" .Values.resources.limits.memory }}
-
-# By default spike_limit_mib is set to 25% of ".Values.resources.limits.memory"
-spike_limit_mib: {{ include "opentelemetry-collector.getMemSpikeLimitMib" .Values.resources.limits.memory }}
-
-# By default ballast_size_mib is set to 40% of ".Values.resources.limits.memory"
-ballast_size_mib: {{ include "opentelemetry-collector.getMemBallastSizeMib" .Values.resources.limits.memory }}
+limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
+# Agent will set this value.
+ballast_size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
 {{- end }}
 
 
@@ -61,27 +57,6 @@ Convert memory value from resources.limit to numeric value in MiB to be used by 
 {{- end -}}
 {{- end -}}
 
-{{/*
-Get otel memory_limiter limit_mib value based on 80% of resources.memory.limit.
-*/}}
-{{- define "opentelemetry-collector.getMemLimitMib" -}}
-{{- div (mul (include "opentelemetry-collector.convertMemToMib" .) 80) 100 }}
-{{- end -}}
-
-{{/*
-Get otel memory_limiter spike_limit_mib value based on 25% of resources.memory.limit.
-*/}}
-{{- define "opentelemetry-collector.getMemSpikeLimitMib" -}}
-{{- div (mul (include "opentelemetry-collector.convertMemToMib" .) 25) 100 }}
-{{- end -}}
-
-{{/*
-Get otel memory_limiter ballast_size_mib value based on 40% of resources.memory.limit.
-*/}}
-{{- define "opentelemetry-collector.getMemBallastSizeMib" }}
-{{- div (mul (include "opentelemetry-collector.convertMemToMib" .) 40) 100 }}
-{{- end -}}
-
 {{- define "opentelemetry-collector.agent.hecConfig" -}}
 exporters:
   splunk_hec:
@@ -94,6 +69,11 @@ extensions:
   health_check: {}
   file_storage:
     directory: {{ .Values.checkpointPath }}
+  memory_ballast:
+#   In general, the ballast should be set to 1/3 of the collector's memory, the limit
+#   should be 90% of the collector's memory.
+#   The simplest way to specify the ballast size is set the value of SPLUNK_BALLAST_SIZE_MIB env variable.
+    size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
 receivers:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver
   filelog:

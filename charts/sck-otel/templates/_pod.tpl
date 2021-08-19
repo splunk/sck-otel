@@ -12,7 +12,6 @@ containers:
       - /{{ .Values.command.name }}
       - --config=/conf/relay.yaml
       - --metrics-addr=0.0.0.0:8888
-      - --mem-ballast-size-mib={{ template "opentelemetry-collector.getMemBallastSizeMib" .Values.resources.limits.memory }}
       {{- range .Values.command.extraArgs }}
       - {{ . }}
       {{- end }}
@@ -37,6 +36,8 @@ containers:
           fieldRef:
             apiVersion: v1
             fieldPath: status.podIP
+      - name: SPLUNK_MEMORY_TOTAL_MIB
+        value: "{{ include "opentelemetry-collector.convertMemToMib" .Values.resources.limits.memory }}"
       - name: KUBE_NODE_NAME
         valueFrom:
           fieldRef:
