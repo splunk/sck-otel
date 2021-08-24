@@ -6,6 +6,19 @@ imagePullSecrets:
 serviceAccountName: {{ include "opentelemetry-collector.serviceAccountName" . }}
 securityContext:
   {{- toYaml .Values.podSecurityContext | nindent 2 }}
+initContainers:
+  - name: chown
+    image: registry.access.redhat.com/ubi8/ubi
+    command: ['sh', '-c', "chown -Rv 20000:20000 {{ .Values.checkpointPath }}; chmod -v g+rwx {{ .Values.checkpointPath }}{{ if .Values.containers.enabled }}; setfacl -R -d -m g:20000:rx /var/log;setfacl -R -d -m g:20000:rx /var/lib/docker/containers{{ end }}"]
+    volumeMounts:
+      - name: checkpoint
+        mountPath: {{ .Values.checkpointPath }}    
+      {{- if .Values.containers.enabled }}
+      - name: varlog
+        mountPath: /var/log
+      - name: varlibdockercontainers
+        mountPath: /var/lib/docker/containers
+      {{- end }}        
 containers:
   - name: otelcollector
     command:

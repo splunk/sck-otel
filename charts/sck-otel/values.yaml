@@ -93,7 +93,6 @@ containers:
 #    - containerName: buttercup-app
 #      first_entry_regex: "^.+Exception[^\n]++(\s+at.*)+"
 
-
 # List of key/value pairs for metadata purpose.
 # Can be used to define things such as cloud_account_id, cloud_account_region, etc.
 customMetadata: {}
@@ -127,10 +126,16 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-podSecurityContext:
-  runAsUser: 10001
-  runAsGroup: 10001
-securityContext: {}
+podSecurityContext: {}
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsGroup: 20000
+  runAsUser: 20000
+  # capabilities:
+  #   add:
+  #     - CAP_AUDIT_READ
+  #     - CAP_DAC_READ_SEARCH
+
 podAnnotations: {}
 
 nodeSelector: {}

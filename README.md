@@ -34,48 +34,7 @@ If you do not configure this index, Splunk Connect for Kubernetes-OpenTelemetry 
 
 ## Setup for Non-Root User Group
 
-It is best practice to run pods as a non-root user. To avoid running collector pod as `root` user, perform below steps on each kubernetes nodes.
-
-In this chart, it is set to run as as a user with UID and GID of `10001` ([set here](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml#L104)). But this user does not have the permission to read container log files typically owned by `root`. Below steps create a user with GID 10001 and grant access to that GID. 
-
-```bash
-# create a user otel with uid=10001 and gid=10001
-sudo adduser --disabled-password --uid 10001 --no-create-home otel
-
-# setup a directory for storing checkpoints
-sudo mkdir /var/lib/otel_pos
-sudo chgrp otel /var/lib/otel_pos
-sudo chmod g+rwx /var/lib/otel_pos
-
-# setup container log directories. 
-# To check where the files are, check symlinks file on `/var/log/pods/` and its target paths.
-ls -Rl /var/log/pods
-# default paths are these
-# `/var/lib/docker/containers` for docker 
-# `/var/log/crio/pods` for cri-o
-# `/var/log/pods` for containerd
-# add your container log path if different
-if [ -d "/var/lib/docker/containers" ] 
-then
-    sudo chgrp -R otel /var/lib/docker/containers
-    sudo chmod -R g+rwx /var/lib/docker/containers
-    sudo setfacl -Rm d:g:otel:rwx,g:otel:rwx /var/lib/docker/containers
-fi
-
-if [ -d "/var/log/crio/pods" ] 
-then
-    sudo chgrp -R otel /var/log/crio/pods
-    sudo chmod -R g+rwx /var/log/crio/pods
-    sudo setfacl -Rm d:g:otel:rwx,g:otel:rwx /var/log/crio/pods
-fi
-
-if [ -d "/var/log/pods" ] 
-then
-    sudo chgrp -R otel /var/log/pods
-    sudo chmod -R g+rwx /var/log/pods
-    sudo setfacl -Rm d:g:otel:rwx,g:otel:rwx /var/log/pods
-fi
-```
+It is best practice to run pods as a non-root user. To avoid running collector pod as `root` user this chart will modify the facl of /var/log to permit the groupid `20000` read and execute. 
 
 ## Deploy with Helm 3.0+
 
