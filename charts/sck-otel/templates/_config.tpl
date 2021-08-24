@@ -123,15 +123,14 @@ receivers:
         id: crio-recombine
         combine_field: log
         is_last_entry: "($$.logtag) == 'F'"
-        # output: filename
       - type: restructure
-        id: check for empty log
+        id: crio-handle_empty_log
         output: filename
+        if: 'EXPR($$.log) == nil'
         ops:
           - add:
-              if: 'EXPR($$.log) != nil'
               field: log
-              value: "nil"
+              value: ""
       {{- end }}
       {{- if or (not .Values.containers.containerRuntime) (eq .Values.containers.containerRuntime "containerd") }}
       # Parse CRI-Containerd format
@@ -143,9 +142,16 @@ receivers:
           layout: '%Y-%m-%dT%H:%M:%S.%LZ'
       - type: recombine
         id: containerd-recombine
-        output: filename
         combine_field: log
         is_last_entry: "($$.logtag) == 'F'"
+      - type: restructure
+        id: containerd-handle_empty_log
+        output: filename
+        if: 'EXPR($$.log) == nil'
+        ops:
+          - add:
+              field: log
+              value: ""
       {{- end }}
       {{- if or (not .Values.containers.containerRuntime) (eq .Values.containers.containerRuntime "docker") }}
       # Parse Docker format
