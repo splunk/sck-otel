@@ -1,4 +1,4 @@
-# What does Splunk Connect for Kubernetes-OpenTelemetry do?
+# Splunk Connect for Kubernetes-OpenTelemetry
 
 Splunk Connect for Kubernetes-OpenTelemetry provides a way to import and search your Kubernetes logging data in your Splunk platform deployment. Splunk Connect for Kubernetes-OpenTelemetry supports importing and searching your kubernetes logs on the following kubernetes distributions:
 
@@ -9,6 +9,7 @@ Splunk Connect for Kubernetes-OpenTelemetry provides a way to import and search 
 * and many others!
 
 Splunk Inc. is a proud contributor to the Cloud Native Computing Foundation (CNCF). Splunk Connect for Kubernetes-OpenTelemetry utilizes and supports multiple CNCF components in the development of these tools to get data into Splunk.
+> This project is currently in **BETA**
 
 ## Prerequisites
 
@@ -213,6 +214,10 @@ The current maintainers of this project are the DataEdge team at Splunk.
 
 # Contributing
 We welcome feedback and contributions from the community! Please see our ([contribution guidelines](https://github.com/splunk/sck-otel/blob/main/CONTRIBUTING.md)) for more information on how to get involved. PR contributions require acceptance of both the code of conduct and the contributor license agreement.
+
+# Upgrading
+## v0.2.x -> v0.3.0
+If using `.Values.configOverride` and have expressions that refer log record, double up `$` characters for those expressions. [Expressions](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/types/expression.md)
 
 # License
 
