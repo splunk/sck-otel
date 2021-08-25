@@ -45,7 +45,7 @@ checkpointPath: "/var/lib/otel_pos"
 containers:
   enabled: true
   # Container runtime. One of `docker`, `cri-o`, or `containerd`
-  containerRuntime: docker
+  containerRuntime: ""
   # Path of container log files, default /var/log/pods/*/*/*.log
   # The file format is /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<run_id>.log
   path: /var/log/pods/*/*/*.log

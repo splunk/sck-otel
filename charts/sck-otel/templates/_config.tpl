@@ -126,7 +126,7 @@ receivers:
       - type: restructure
         id: crio-handle_empty_log
         output: filename
-        if: 'EXPR($$.log) == nil'
+        if: $$.log == nil
         ops:
           - add:
               field: log
@@ -147,7 +147,7 @@ receivers:
       - type: restructure
         id: containerd-handle_empty_log
         output: filename
-        if: 'EXPR($$.log) == nil'
+        if: $$.log == nil
         ops:
           - add:
               field: log
