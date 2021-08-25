@@ -1,5 +1,7 @@
 # Splunk Connect for Kubernetes-OpenTelemetry
 
+> This project is currently in **BETA**.   We welcome your questions, feedback and contributions!  Please open an issue and ask a question, tell us what you think or about any problems you ran into.  The incremental features included in this repo will be folded into the [Splunk OpenTelemetry Connector](https://github.com/signalfx/splunk-otel-collector) and [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector) projects.  Your input is part of our efforts to make a better product.
+
 Splunk Connect for Kubernetes-OpenTelemetry provides a way to import and search your Kubernetes logging data in your Splunk platform deployment. Splunk Connect for Kubernetes-OpenTelemetry supports importing and searching your kubernetes logs on the following kubernetes distributions:
 
 * Amazon Elastic Kubernetes Service (Amazon EKS)
@@ -9,7 +11,6 @@ Splunk Connect for Kubernetes-OpenTelemetry provides a way to import and search 
 * and many others!
 
 Splunk Inc. is a proud contributor to the Cloud Native Computing Foundation (CNCF). Splunk Connect for Kubernetes-OpenTelemetry utilizes and supports multiple CNCF components in the development of these tools to get data into Splunk.
-> This project is currently in **BETA**
 
 ## Prerequisites
 
