@@ -60,7 +60,7 @@ Convert memory value from resources.limit to numeric value in MiB to be used by 
 {{- define "splunk-otel-collector.agent.hecConfig" -}}
 exporters:
   {{- if .Values.splunkPlatform.endpoint }}
-  splunk_hec:
+  splunk_hec/platform:
     splunk_app_name: {{ .Chart.Name }}
     splunk_app_version: {{ .Chart.Version }}
   {{- end }}
@@ -295,9 +295,9 @@ processors:
       action: upsert
 exporters:
   {{- if .Values.splunkPlatform.endpoint }}
-  splunk_hec:
+  splunk_hec/platform:
     endpoint: {{ .Values.splunkPlatform.endpoint | quote }}
-    token: "${SPLUNK_HEC_TOKEN}"
+    token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
     index: {{ .Values.splunkPlatform.index | quote }}
     source: {{ .Values.splunkPlatform.source | quote }}
     sourcetype: {{ .Values.splunkPlatform.sourcetype | quote }}
@@ -320,7 +320,7 @@ exporters:
   {{- if or .Values.splunkObservability.ingestUrl .Values.splunkObservability.realm }}
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.ingestUrl" . }}/v1/log
-    token: "${SPLUNK_ACCESS_TOKEN}"
+    token: "${SPLUNK_O11Y_ACCESS_TOKEN}"
   {{- end }}
   {{- end }}
 service:
@@ -341,7 +341,7 @@ service:
         - resource/splunk
       exporters:
         {{- if .Values.splunkPlatform.endpoint }}
-        - splunk_hec
+        - splunk_hec/platform
         {{- end }}
         {{- if .Values.splunkObservability.logsEnabled }}
         {{- if or .Values.splunkObservability.ingestUrl .Values.splunkObservability.realm }}
@@ -360,7 +360,7 @@ service:
         - batch
       exporters:
         {{- if .Values.splunkPlatform.endpoint }}
-        - splunk_hec
+        - splunk_hec/platform
         {{- end }}
         {{- if .Values.splunkObservability.logsEnabled }}
         {{- if or .Values.splunkObservability.ingestUrl .Values.splunkObservability.realm }}

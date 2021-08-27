@@ -41,14 +41,14 @@ Get Splunk ingest URL
 {{/*
 Get splunkAccessToken.
 */}}
-{{- define "splunk-otel-collector.accessToken" -}}
+{{- define "splunk-otel-collector.o11yAccessToken" -}}
 {{- required "splunkObservability.splunkAccessToken value must be provided" .Values.splunkObservability.accessToken -}}
 {{- end -}}
 
 {{/*
 Get splunkHecToken.
 */}}
-{{- define "splunk-otel-collector.hecToken" -}}
+{{- define "splunk-otel-collector.platformHecToken" -}}
 {{- required "splunkPlatform.token value must be provided" .Values.splunkPlatform.token -}}
 {{- end -}}
 

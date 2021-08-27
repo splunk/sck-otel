@@ -44,18 +44,18 @@ containers:
             apiVersion: v1
             fieldPath: spec.nodeName
       {{- if .Values.splunkObservability.accessToken }}
-      - name: SPLUNK_ACCESS_TOKEN
+      - name: SPLUNK_O11Y_ACCESS_TOKEN
         valueFrom:
           secretKeyRef:
             name: {{ include "splunk-otel-collector.secret" . }}
-            key: splunk_access_token
+            key: splunk_o11y_access_token
       {{- end }}
       {{- if .Values.splunkPlatform.token }}
-      - name: SPLUNK_HEC_TOKEN
+      - name: SPLUNK_PLATFORM_HEC_TOKEN
         valueFrom:
           secretKeyRef:
             name: {{ include "splunk-otel-collector.secret" . }}
-            key: splunk_hec_token
+            key: splunk_platform_hec_token
       {{- end }}
       {{- with .Values.agent.extraEnvs }}
       {{- . | toYaml | nindent 6 }}
