@@ -1,15 +1,15 @@
-{{- if eq .Values.containers.enrichK8sMetadata true -}}
+{{- if eq .Values.k8sMetadata.enabled true -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ template "opentelemetry-collector.fullname" . }}
+  name: {{ template "splunk-otel-collector.fullname" . }}
   labels:
-    {{- include "opentelemetry-collector.labels" . | nindent 4 }}
+    {{- include "splunk-otel-collector.labels" . | nindent 4 }}
 rules:
 - apiGroups:      ['extensions']
   resources:      ['podsecuritypolicies']
   verbs:          ['use']
-  resourceNames:  [{{ template "opentelemetry-collector.fullname" . }}]
+  resourceNames:  [{{ template "splunk-otel-collector.fullname" . }}]
 - apiGroups:
     - ""
   resources:

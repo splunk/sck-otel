@@ -5,14 +5,19 @@
 nameOverride: ""
 fullnameOverride: ""
 
-# Splunk HEC configuration
-splunk_hec:
-  # Required. URL to a Splunk instance to send data to. ie) "http://X.X.X.X:8088/services/collector"
+# Splunk Data-to-Everything Platform configuration.
+# Fields `endpoint` and `token` are required to collect and send logs to Splunk Cloud or Splunk Enterprise.
+splunkPlatform:
+  # URL to a Splunk instance to send data to. ie) "http://X.X.X.X:8088/services/collector"
   endpoint: https://0.0.0.0:8088/services/collector
-  # Required. Splunk HTTP Event Collector token.
+  # Splunk HTTP Event Collector token.
   token: "00000000-0000-0000-0000-000000000000"
   # Optional. Name of the Splunk index targeted.
   index:
+  # Optional. Default value for `source` field.
+  source:
+  # Optional. Default value for `sourcetype` field. For container logs, it will be container name.
+  sourcetype:
   # Maximum HTTP connections to use simultaneously when sending data. Defaults to 200.
   max_connections: 200
   # Whether to disable gzip compression over HTTP. Defaults to true.
@@ -20,7 +25,7 @@ splunk_hec:
   # HTTP timeout when sending data. Defaults to 10s.
   timeout: 10s
   # Whether to skip checking the certificate of the HEC endpoint when sending data over HTTPS. Defaults to true.
-  insecure_skip_verify: true
+  insecure_skip_verify: false
   # The PEM-format CA certificate for this client.
   # NOTE: The content of the certificate itself should be used here, not the file path.
   #       The certificate will be stored as a secret in kubernetes.
@@ -34,38 +39,9 @@ splunk_hec:
   #       The file will be stored as a secret in kubernetes.
   caFile:
 
-# Persistent storage path for storing checkpoints
-checkpointPath: "/var/log/pods/otel_pos"
-
 # Configurations for container logs
-containers:
+containerLogs:
   enabled: true
   # Container runtime. One of `docker`, `cri-o`, or `containerd`
-  containerRuntime: docker
-  # Path of container log files, default /var/log/pods/*/*/*.log
-  # The file format is /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<run_id>.log
-  path: /var/log/pods/*/*/*.log
-  # Paths of logfiles to exclude. object type is array:
-  exclude_paths: []
-  #  - /var/log/pods/kube-system_*.log (to exclude `kube-system` namespace)
-  # Boolean for ingesting the agent's own log
-  excludeAgentLogs: false
-  # Extra operators for container logs. https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/README.md#what-operators-are-available
-  extraOperators: []
-  # Boolean for enriching container logs with k8s metadata (labels, annotations, etc)
-  enrichK8sMetadata: true
-  # List of annotation and label fields to enrich with
-  listOfAnnotations:
-    - key: splunk.com/index
-    - key: splunk.com/sourcetype
-    - key: splunk.com/exclude
-  listOfLabels:
-    - key: app
-
-securityContext:
-  runAsUser: 0
-
-resources:
-  limits:
-    cpu: 256m
-    memory: 512Mi
+  # Automatically discovered if not set.
+  containerRuntime: "containerd"

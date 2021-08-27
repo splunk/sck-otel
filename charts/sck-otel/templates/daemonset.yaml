@@ -1,25 +1,37 @@
+{{- if .Values.agent.enabled }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: {{ include "opentelemetry-collector.fullname" . }}
+  name: {{ include "splunk-otel-collector.fullname" . }}
   labels:
-    {{- include "opentelemetry-collector.labels" . | nindent 4 }}
+    {{- include "splunk-otel-collector.labels" . | nindent 4 }}
+    {{- with .Values.agent.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.agent.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   selector:
     matchLabels:
-      {{- include "opentelemetry-collector.selectorLabels" . | nindent 6 }}
+      {{- include "splunk-otel-collector.selectorLabels" . | nindent 6 }}
       component: agent-collector
   template:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        {{- with .Values.podAnnotations }}
+        {{- with .Values.agent.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       labels:
-        {{- include "opentelemetry-collector.selectorLabels" . | nindent 8 }}
+        {{- include "splunk-otel-collector.selectorLabels" . | nindent 8 }}
         component: agent-collector
+        {{- with .Values.agent.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- $podValues := deepCopy .Values | mustMergeOverwrite (deepCopy .Values) }}
       {{- $podData := dict "Values" $podValues }}
-      {{- include "opentelemetry-collector.pod" ($podData | mustMergeOverwrite (deepCopy .)) | nindent 6 }}
+      {{- include "splunk-otel-collector.pod" ($podData | mustMergeOverwrite (deepCopy .)) | nindent 6 }}
+{{- end }}

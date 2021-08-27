@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### 🛑 Breaking changes 🛑
+- Redesign values.yaml and support O11y for logs (#62)
+
+### 💡 Enhancements 💡
+- This chart now can send logs to both Splunk platform and Observerability suite
+
 ## v0.3.1
 
 ### 🧰 Bug fixes 🧰

@@ -1,0 +1,16 @@
+# Splunk Observability configuration.
+# Fields `realm` and `accessToken` are required to collect and send telemetry data to Splunk Observability Cloud.
+splunkObservability:
+  # Splunk Observability realm to send telemetry data to.
+  realm: us0
+  # Splunk Observability org access token.
+  accessToken: "AAAaaaAaaaaaAaa12A3A4a"
+  # Optional. Splunk Observability ingest URL, default: "https://ingest.<realm>.signalfx.com".
+  ingestUrl:
+  # Optional. Splunk Observability API URL, default: "https://api.<realm>.signalfx.com".
+  apiUrl:
+
+  # Options to disable particular telemetry data types that will be sent to Splunk Observability.
+  logsEnabled: true
+  metricsEnabled: true
+  tracesEnabled: true

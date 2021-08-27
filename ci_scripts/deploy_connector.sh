@@ -10,10 +10,10 @@ else
    helm delete $(helm ls --short)
 fi
 echo "Deploying sck-otel-connect with latest changes"
-helm install ci-sck --set splunk_hec.index=$CI_INDEX_EVENTS \
---set splunk_hec.token=$CI_SPLUNK_HEC_TOKEN \
---set splunk_hec.endpoint=https://$CI_SPLUNK_HOST:8088/services/collector \
---set containers.containerRuntime=$CONTAINER_RUNTIME \
+helm install ci-sck --set splunkPlatform.index=$CI_INDEX_EVENTS \
+--set splunkPlatform.token=$CI_SPLUNK_HEC_TOKEN \
+--set splunkPlatform.endpoint=https://$CI_SPLUNK_HOST:8088/services/collector \
+--set containerLogs.containerRuntime=$CONTAINER_RUNTIME \
 -f ci_scripts/sck_otel_values.yaml charts/sck-otel/
 #wait for deployment to finish
 until kubectl get pod | grep Running | [[ $(wc -l) == 1 ]]; do
