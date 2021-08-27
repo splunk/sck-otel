@@ -1,11 +1,11 @@
-{{- define "opentelemetry-collector.pod" -}}
+{{- define "splunk-otel-collector.pod" -}}
 {{- with .Values.imagePullSecrets }}
 imagePullSecrets:
   {{- toYaml . | nindent 2 }}
 {{- end }}
-serviceAccountName: {{ include "opentelemetry-collector.serviceAccountName" . }}
+serviceAccountName: {{ include "splunk-otel-collector.serviceAccountName" . }}
 securityContext:
-  {{- toYaml .Values.podSecurityContext | nindent 2 }}
+  {{- toYaml .Values.agent.podSecurityContext | nindent 2 }}
 containers:
   - name: otelcollector
     command:
@@ -16,7 +16,7 @@ containers:
       - {{ . }}
       {{- end }}
     securityContext:
-      {{- toYaml .Values.securityContext | nindent 6 }}
+      {{- toYaml .Values.agent.securityContext | nindent 6 }}
     image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
     imagePullPolicy: {{ .Values.image.pullPolicy }}
     ports:
@@ -37,13 +37,27 @@ containers:
             apiVersion: v1
             fieldPath: status.podIP
       - name: SPLUNK_MEMORY_TOTAL_MIB
-        value: "{{ include "opentelemetry-collector.convertMemToMib" .Values.resources.limits.memory }}"
+        value: "{{ include "splunk-otel-collector.convertMemToMib" .Values.agent.resources.limits.memory }}"
       - name: KUBE_NODE_NAME
         valueFrom:
           fieldRef:
             apiVersion: v1
             fieldPath: spec.nodeName
-      {{- with .Values.extraEnvs }}
+      {{- if .Values.splunkObservability.accessToken }}
+      - name: SPLUNK_ACCESS_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: {{ include "splunk-otel-collector.secret" . }}
+            key: splunk_access_token
+      {{- end }}
+      {{- if .Values.splunkPlatform.token }}
+      - name: SPLUNK_HEC_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: {{ include "splunk-otel-collector.secret" . }}
+            key: splunk_hec_token
+      {{- end }}
+      {{- with .Values.agent.extraEnvs }}
       {{- . | toYaml | nindent 6 }}
       {{- end }}
     livenessProbe: 
@@ -55,27 +69,16 @@ containers:
         path: /
         port: 13133
     resources:
-      {{- toYaml .Values.resources | nindent 6 }}
+      {{- toYaml .Values.agent.resources | nindent 6 }}
     volumeMounts:
       - mountPath: /conf
         name: {{ .Chart.Name }}-configmap
-      {{- range .Values.extraHostPathMounts }}
-      - name: {{ .name }}
-        mountPath: {{ .mountPath }}
-        readOnly: {{ .readOnly }}
-        {{- if .mountPropagation }}
-        mountPropagation: {{ .mountPropagation }}
-        {{- end }}
+      {{- if .Values.agent.extraVolumeMounts}}
+      {{- with .Values.agent.extraVolumeMounts }}
+      {{ . | toYaml | nindent 6 }}
       {{- end }}
-      {{- range .Values.secretMounts }}
-      - name: {{ .name }}
-        mountPath: {{ .mountPath }}
-        readOnly: {{ .readOnly }}
-        {{- if .subPath }}
-        subPath: {{ .subPath }}
-        {{- end }}
       {{- end }}
-      {{- if .Values.containers.enabled }}
+      {{- if .Values.containerLogs.enabled }}
       - name: varlog
         mountPath: /var/log
         readOnly: true
@@ -85,7 +88,7 @@ containers:
       {{- end }}
       - name: checkpoint
         mountPath: {{ .Values.checkpointPath }}
-      {{- if or .Values.splunk_hec.clientCert .Values.splunk_hec.clientKey .Values.splunk_hec.caFile }}
+      {{- if or .Values.splunkPlatform.clientCert .Values.splunkPlatform.clientKey .Values.splunkPlatform.caFile }}
       - name: secret
         mountPath: /otel/etc
         readOnly: true
@@ -93,21 +96,14 @@ containers:
 volumes:
   - name: {{ .Chart.Name }}-configmap
     configMap:
-      name: {{ include "opentelemetry-collector.fullname" . }}
+      name: {{ include "splunk-otel-collector.fullname" . }}
       items:
         - key: relay
           path: relay.yaml
-  {{- range .Values.extraHostPathMounts }}
-  - name: {{ .name }}
-    hostPath:
-      path: {{ .hostPath }}
+  {{- with .Values.agent.extraVolumes }}
+  {{ . | toYaml | nindent 2 }}
   {{- end }}
-  {{- range .Values.secretMounts }}
-  - name: {{ .name }}
-    secret:
-      secretName: {{ .secretName }}
-  {{- end }}
-  {{- if .Values.containers.enabled }}
+  {{- if .Values.containerLogs.enabled }}
   - name: varlog
     hostPath:
       path: /var/log
@@ -121,20 +117,20 @@ volumes:
       path: {{ . }}
       {{- end }}
       type: DirectoryOrCreate
-  {{- if or .Values.splunk_hec.clientCert .Values.splunk_hec.clientKey .Values.splunk_hec.caFile }}
+  {{- if or .Values.splunkPlatform.clientCert .Values.splunkPlatform.clientKey .Values.splunkPlatform.caFile }}
   - name: secret
     secret:
-      secretName: {{ template "opentelemetry-collector.secret" . }}
+      secretName: {{ template "splunk-otel-collector.secret" . }}-cert
   {{- end }}
-{{- with .Values.nodeSelector }}
+{{- with .Values.agent.nodeSelector }}
 nodeSelector:
   {{- toYaml . | nindent 2 }}
 {{- end }}
-{{- with .Values.affinity }}
+{{- with .Values.agent.affinity }}
 affinity:
   {{- toYaml . | nindent 2 }}
 {{- end }}
-{{- with .Values.tolerations }}
+{{- with .Values.agent.tolerations }}
 tolerations:
   {{- toYaml . | nindent 2 }}
 {{- end }}

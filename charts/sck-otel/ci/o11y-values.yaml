@@ -43,9 +43,9 @@ splunkPlatform:
 # Fields `realm` and `accessToken` are required to collect and send telemetry data to Splunk Observability Cloud.
 splunkObservability:
   # Splunk Observability realm to send telemetry data to.
-  realm:
+  realm: us0
   # Splunk Observability org access token.
-  accessToken:
+  accessToken: "AAAaaaAaaaaaAaa12A3A4a"
   # Optional. Splunk Observability ingest URL, default: "https://ingest.<realm>.signalfx.com".
   ingestUrl:
   # Optional. Splunk Observability API URL, default: "https://api.<realm>.signalfx.com".
@@ -109,7 +109,7 @@ containerLogs:
   enabled: true
   # Container runtime. One of `docker`, `cri-o`, or `containerd`
   # Automatically discovered if not set.
-  containerRuntime: ""
+  containerRuntime: "docker"
   # Path of container log files, default /var/log/pods/*/*/*.log
   # The file format is /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<run_id>.log
   path: /var/log/pods/*/*/*.log

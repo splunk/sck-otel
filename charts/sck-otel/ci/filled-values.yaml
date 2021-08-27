@@ -9,15 +9,15 @@ fullnameOverride: ""
 # Fields `endpoint` and `token` are required to collect and send logs to Splunk Cloud or Splunk Enterprise.
 splunkPlatform:
   # URL to a Splunk instance to send data to. ie) "http://X.X.X.X:8088/services/collector"
-  endpoint:
+  endpoint: https://0.0.0.0:8088/services/collector
   # Splunk HTTP Event Collector token.
-  token:
+  token: "00000000-0000-0000-0000-000000000000"
   # Optional. Name of the Splunk index targeted.
-  index:
+  index: "main"
   # Optional. Default value for `source` field.
   source: "kubernetes"
   # Optional. Default value for `sourcetype` field. For container logs, it will be container name.
-  sourcetype:
+  sourcetype: "kube"
   # Maximum HTTP connections to use simultaneously when sending data. Defaults to 200.
   max_connections: 200
   # Whether to disable gzip compression over HTTP. Defaults to true.
@@ -29,23 +29,26 @@ splunkPlatform:
   # The PEM-format CA certificate for this client.
   # NOTE: The content of the certificate itself should be used here, not the file path.
   #       The certificate will be stored as a secret in kubernetes.
-  clientCert:
+  clientCert: |
+    clientCert
   # The private key for this client.
   # NOTE: The content of the key itself should be used here, not the file path.
   #       The key will be stored as a secret in kubernetes.
-  clientKey:
+  clientKey: |
+    clientKey
   # The PEM-format CA certificate file.
   # NOTE: The content of the file itself should be used here, not the file path.
   #       The file will be stored as a secret in kubernetes.
-  caFile:
+  caFile: |
+    caFile
 
 # Splunk Observability configuration.
 # Fields `realm` and `accessToken` are required to collect and send telemetry data to Splunk Observability Cloud.
 splunkObservability:
   # Splunk Observability realm to send telemetry data to.
-  realm:
+  realm: us0
   # Splunk Observability org access token.
-  accessToken:
+  accessToken: "AAAaaaAaaaaaAaa12A3A4a"
   # Optional. Splunk Observability ingest URL, default: "https://ingest.<realm>.signalfx.com".
   ingestUrl:
   # Optional. Splunk Observability API URL, default: "https://api.<realm>.signalfx.com".
@@ -58,9 +61,9 @@ splunkObservability:
 
 
 # If provided, `k8s.cluster.name` attribute will be set uniformly across all the telemetry.
-clusterName:
+clusterName: "test cluster"
 # If provided, `deployment.environment` attribute will be set on traces and logs when it's missed.
-environment:
+environment: "test env"
 
 # Metadata to be set on the telemetry data from Kubernetes objects.
 # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/k8sprocessor.
@@ -68,9 +71,14 @@ k8sMetadata:
   # Boolean for enriching all telemetry with k8s metadata (labels, annotations, etc)
   enabled: true
   # This option is to fetch metadata from extra annotations.
-  annotations: []
+  annotations:
+    - key: splunk.com/customField
+      tag_name: customField
   labels:
     - key: app
+      from: pod
+    - key: app
+      from: namespace
 
 # Cloud provider, if any, the collector is running on. Leave empty for none/other.
 # This option adds cloud specific metadata to the telemetry.
@@ -78,23 +86,22 @@ k8sMetadata:
 # - "aws" (Amazon Web Services)
 # - "gcp" (Google Cloud Platform)
 # - "azure" (Microsoft Azure)
-cloudProvider: ""
+cloudProvider: "aws"
 
 # Kubernetes distribution being run. Leave empty for none/other. Similar to cloudProvider.
 # - "eks" (Amazon Elastic Kubernetes Service)
 # - "gke" (Google Google Kubernetes Engine)
 # - "aks" (Azure Kubernetes Service)
-k8sDistro: ""
+k8sDistro: "eks"
 
 # List of key/value pairs to set additional metadata set uniformly across the collected telemetry.
 # Can be used to define things such as cloud_account_id, cloud_account_region, etc.
 # Should be set using https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/resourceprocessor.
-customMetadata: {}
-#  cloud_account_id: "1234567890"
+customMetadata:
+  cloud_account_id: "1234"
 
 # Automatic detection of additional telemetry sources.
-# For now it has effect on Splunk Observability only,
-# but can it be used with Splunk Platform in future as well?
+# For now it has effect on Splunk Observability only.
 autodetect:
   # Set to `true` if you want the agent to scrape
   # prometheus metrics from pods that have prometheus-style annotations like
@@ -116,16 +123,20 @@ containerLogs:
   # Paths of logfiles to exclude. object type is array:
   # i.e) to exclude `kube-system` namespace,
   # excludePaths: [ /var/log/pods/kube-system_*/*/*.log ]
-  excludePaths: []
+  excludePaths: [/var/log/pods/kube-system_*/*/*.log]
   #  - /var/log/pods/kube-system_*.log (to exclude `kube-system` namespace)
   # Boolean for ingesting the agent's own log
-  excludeAgentLogs: false
+  excludeAgentLogs: true
   # Extra operators for container logs. https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/README.md#what-operators-are-available
-  extraOperators: []
+  extraOperators:
+    - type: metadata
+      id: test
+      resource:
+        extra: operator
 
   # Multiline logs currently support only container name which is not unique within the cluster.
   # Can we also support k8s object owner name (deployment, daemonset, statefulset) along with namespace?
-  multilineConfigs: []
+  # multilineConfigs: []
   #  Example configuration for processing and handling multiline logs/ java stack trace from test container "buttercup-app" by specifying  a regular expression (first_entry_regex) to parse first entry in a multiline log series.
   #  Sample java stack trace/ multiline log from container "buttercup-app"
   #  .........
@@ -138,29 +149,29 @@ containerLogs:
   #  .........
 
   #  Sample configuration to handle multiline java stack trace from buttercup-app container
-  #  multilineConfigs:
-  #    - containerName: buttercup-app
-  #      first_entry_regex: ^.+Exception[^\n]++(\s+at.*)+
+  multilineConfigs:
+    - containerName: buttercup-app
+      first_entry_regex: ^.+Exception[^\n]++(\s+at.*)+
 
 # Specify configuration for any files other than container log files
 # ref: https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/file_input.md
-extraFileLogs: {}
+# extraFileLogs: {}
 # Sample configuration to collect Audit logs. Please note hostPath can vary depending on the audit-policy.yaml configuration.
-# extraFileLogs:
-#   filelog/audit-log:
-#     include: [/var/log/kubernetes/apiserver/audit.log]
-#     start_at: beginning
-#     include_file_path: true
-#     include_file_name: false
-#     resource:
-#       service.name: /var/log/kubernetes/apiserver/audit.log
-#       host.name: 'EXPR(env("KUBE_NODE_NAME"))'
-#       com.splunk.sourcetype: kube:apiserver-audit
+extraFileLogs:
+  filelog/audit-log:
+    include: [/var/log/kubernetes/apiserver/audit.log]
+    start_at: beginning
+    include_file_path: true
+    include_file_name: false
+    resource:
+      service.name: /var/log/kubernetes/apiserver/audit.log
+      host.name: 'EXPR(env("KUBE_NODE_NAME"))'
+      com.splunk.sourcetype: kube:apiserver-audit
 # agent:
 #   extraVolumeMounts:
 #     - name: audit-log
 #       mountPath: /var/log/kubernetes/apiserver
-#   extraVolumes:
+#   extraVolumes
 #     - name: audit-log
 #       hostPath:
 #         path: /var/log/kubernetes/apiserver
@@ -174,22 +185,27 @@ agent:
   enabled: true
 
   podSecurityContext:
-    runAsUser: 10001
-    runAsGroup: 10001
+    runAsUser: 0  # 0 if we can, otherwise 10001 by default
+    runAsGroup: 0  # 0 if we can, otherwise 10001 by default
   securityContext: {}
 
-  # OTel agent extra daemonset annotations.
-  annotations: {}
-  # OTel agent extra pods annotations.
-  podAnnotations: {}
+  # OTel agent daemonset annotations.
+  annotations:
+    test.com/ds: "true"
+  # OTel agent pods annotations.
+  podAnnotations:
+    test.com/pod: "true"
 
   # OTel agent extra daemonset labels.
-  labels: {}
+  labels:
+    dsLabel: "true"
   # OTel agent extra pod labels.
-  podLabels: {}
+  podLabels:
+    podLabel: testing
 
   # Pods scheduling configurations
-  nodeSelector: {}
+  nodeSelector:
+    kubernetes.io/hostname: ip-0-0-0-0.us-west-1.compute.internal
   affinity: {}
 
   # This allows the daemonset to be deployed on master nodes,
@@ -199,14 +215,22 @@ agent:
       effect: NoSchedule
 
   # Extra environment variables to be set in the agent container.
-  extraEnvs: []
+  extraEnvs:
+    - name: envTesting
+      value: "true"
 
   # Extra volumes to be mounted to the agent container.
   # Can be used to mount any host volumes, secrets, csi drivers, etc.
   # It's more flexible than having extraHostPathMounts, secretMounts and others.
-  extraVolumes: []
-  extraVolumeMounts: []
-
+  # extraVolumes: []
+  # extraVolumeMounts: []
+  extraVolumeMounts:
+    - name: audit-log
+      mountPath: /var/log/kubernetes/apiserver
+  extraVolumes:
+    - name: audit-log
+      hostPath:
+        path: /var/log/kubernetes/apiserver
   # Need to be adjusted based on log EPS of a node.
   resources:
     limits:
@@ -250,16 +274,18 @@ agent:
 
   # Configuration override that will be merged into the agent's default config
   # Example - this will replace `splunk_hec` with `logging` exporter for container logs
-  # config:
-  #   exporters:
-  #     logging/container:
-  #       loglevel: info
-  #   service:
-  #     pipelines:
-  #       logs/container:
-  #         exporters:
-  #           - logging/container
-  config: {}
+  config:
+    exporters:
+      logging/container:
+        loglevel: info
+    service:
+      pipelines:
+        logs/container:
+          exporters:
+            - splunk_hec/o11y
+            - splunk_hec
+            - logging/container
+  # config: {}
 
 
 image:
@@ -288,7 +314,7 @@ secret:
   create: true
   name:
 
-# (To Be Implemented)
+
 # Configuration for additional OTel collector deployment fetching data
 # from the Kubernetes API and sending it to Observability Cloud as metrics and
 # to Splunk Platform as Kubernetes objects (to be added later).
@@ -327,7 +353,6 @@ clusterDataCollector:
   config: {}
 
 
-# (To Be Implemented)
 # OpenTelemetry "gateway" k8s deployment configuration.
 # This is an optional deployment that can be used to forward telemetry data
 # from the agents to a Splunk backend (Observability/Cloud/Enterprise).

@@ -7,10 +7,11 @@ home: https://github.com/splunk/sck-otel
 sources:
   - https://github.com/open-telemetry/opentelemetry-collector
   - https://github.com/open-telemetry/opentelemetry-collector-contrib
+  - https://github.com/signalfx/splunk-otel-collector
 maintainers:
   - name: anujg-splunk
   - name: chaitanyaphalak
   - name: luckyj5
   - name: mwang2016
   - name: rockb1017
-appVersion: 0.33.0
+appVersion: 0.33.1

@@ -5,14 +5,19 @@
 nameOverride: ""
 fullnameOverride: ""
 
-# Splunk HEC configuration
-splunk_hec:
-  # Required. URL to a Splunk instance to send data to. ie) "http://X.X.X.X:8088/services/collector"
+# Splunk Data-to-Everything Platform configuration.
+# Fields `endpoint` and `token` are required to collect and send logs to Splunk Cloud or Splunk Enterprise.
+splunkPlatform:
+  # URL to a Splunk instance to send data to. ie) "http://X.X.X.X:8088/services/collector"
   endpoint:
-  # Required. Splunk HTTP Event Collector token.
+  # Splunk HTTP Event Collector token.
   token:
   # Optional. Name of the Splunk index targeted.
   index:
+  # Optional. Default value for `source` field.
+  source: "kubernetes"
+  # Optional. Default value for `sourcetype` field. For container logs, it will be container name.
+  sourcetype:
   # Maximum HTTP connections to use simultaneously when sending data. Defaults to 200.
   max_connections: 200
   # Whether to disable gzip compression over HTTP. Defaults to true.
@@ -34,59 +39,32 @@ splunk_hec:
   #       The file will be stored as a secret in kubernetes.
   caFile:
 
-# Persistent storage path for storing checkpoints
-checkpointPath: "/var/log/pods/otel_pos"
-
-# Configurations for container logs
-containers:
+# Metadata to be set on the telemetry data from Kubernetes objects.
+# https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/k8sprocessor.
+k8sMetadata:
+  # Boolean for enriching all telemetry with k8s metadata (labels, annotations, etc)
   enabled: true
-  # Container runtime. One of `docker`, `cri-o`, or `containerd`
-  containerRuntime: docker
-  # Path of container log files, default /var/log/pods/*/*/*.log
-  # The file format is /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<run_id>.log
-  path: /var/log/pods/*/*/*.log
-  # Paths of logfiles to exclude. object type is array:
-  exclude_paths: []
-  #  - /var/log/pods/kube-system_*.log (to exclude `kube-system` namespace)
-  # Boolean for ingesting the agent's own log
-  excludeAgentLogs: false
-  # Extra operators for container logs. https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/README.md#what-operators-are-available
-  extraOperators: []
-  # Boolean for enriching container logs with k8s metadata (labels, annotations, etc)
-  enrichK8sMetadata: true
-  # List of annotation and label fields to enrich with
-  listOfAnnotations:
-    - key: splunk.com/index
-    - key: splunk.com/sourcetype
-    - key: splunk.com/exclude
+  # This option is to fetch metadata from extra annotations.
+  annotations:
     - key: splunk.com/customField
       tag_name: customField
-    - key: splunk.com/index
-      from: namespace
-    - key: splunk.com/exclude
-      from: namespace
-  listOfLabels:
+  labels:
     - key: app
       from: pod
     - key: app
       from: namespace
+
+# List of key/value pairs to set additional metadata set uniformly across the collected telemetry.
+# Can be used to define things such as cloud_account_id, cloud_account_region, etc.
+# Should be set using https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/resourceprocessor.
 customMetadata:
   cluster_name: ci-k8s-cluster
   customfield1: customvalue1
   customfield2: customvalue2
 
-securityContext:
-  runAsUser: 0
+# Configuration specific to OTel agent - a daemonset responsible for collecting telemetry data from each k8s node.
+agent:
+  enabled: true
 
-resources:
-  limits:
-    cpu: 256m
-    memory: 512Mi
-
-# Configuration override that will be merged into the agent's default config
-# Example - this will change `include_file_name` parameter for filelog receiver to `true` from default value `false`
-# configOverride:
-#   receivers:
-#     filelog:
-#       include_file_name: true
-configOverride: {}
+  podSecurityContext:
+    runAsUser: 0

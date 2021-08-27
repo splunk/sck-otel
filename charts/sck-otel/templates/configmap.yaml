@@ -1,9 +1,11 @@
+{{- if .Values.agent.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "opentelemetry-collector.fullname" . }}
+  name: {{ include "splunk-otel-collector.fullname" . }}
   labels:
-    {{- include "opentelemetry-collector.labels" . | nindent 4 }}
+    {{- include "splunk-otel-collector.labels" . | nindent 4 }}
 data:
   relay: |
-    {{- include "opentelemetry-collector.agentCollectorConfig" . | nindent 4 -}}
+    {{- include "splunk-otel-collector.agentCollectorConfig" . | nindent 4 -}}
+{{- end }}
