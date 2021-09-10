@@ -60,7 +60,7 @@ containers:
       {{- with .Values.agent.extraEnvs }}
       {{- . | toYaml | nindent 6 }}
       {{- end }}
-    livenessProbe: 
+    livenessProbe:
       httpGet:
         path: /
         port: 13133
@@ -71,6 +71,8 @@ containers:
     resources:
       {{- toYaml .Values.agent.resources | nindent 6 }}
     volumeMounts:
+      - name: journalpath
+        mountPath: /run/log/journal
       - mountPath: /conf
         name: {{ .Chart.Name }}-configmap
       {{- if .Values.agent.extraVolumeMounts}}
@@ -94,6 +96,9 @@ containers:
         readOnly: true
       {{- end }}
 volumes:
+  - name: journalpath
+    hostPath:
+      path: /run/log/journal
   - name: {{ .Chart.Name }}-configmap
     configMap:
       name: {{ include "splunk-otel-collector.fullname" . }}
@@ -112,7 +117,7 @@ volumes:
       path: /var/lib/docker/containers
   {{- end }}
   - name: checkpoint
-    hostPath: 
+    hostPath:
       {{- with .Values.checkpointPath }}
       path: {{ . }}
       {{- end }}

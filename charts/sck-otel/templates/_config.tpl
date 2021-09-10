@@ -84,6 +84,10 @@ extensions:
 #   The simplest way to specify the ballast size is set the value of SPLUNK_BALLAST_SIZE_MIB env variable.
     size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
 receivers:
+  journald:
+    directory: {{- toYaml .Values.journaldlogging.directory | nindent 6 }}
+    units: {{- toYaml .Values.journaldlogging.units | nindent 8 }}
+    priority: {{- toYaml .Values.journaldlogging.priority | nindent 6 }}
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver
   {{- if .Values.containerLogs.enabled }}
   filelog:
