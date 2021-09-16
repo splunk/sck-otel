@@ -54,9 +54,11 @@ processors:
       - action: insert
         key: receiver
         value: k8scluster
+      {{- if .Values.clusterName }}
       - action: upsert
         key: k8s.cluster.name
         value: {{ .Values.clusterName }}
+      {{- end }}
       {{- range $k, $v := .Values.customMetadata }}
       - action: insert
         key: {{ $k }}
@@ -64,6 +66,7 @@ processors:
       {{- end }}
 
 exporters:
+  {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
   signalfx:
     {{- if .Values.gateway.enabled }}
     ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
@@ -74,6 +77,7 @@ exporters:
     {{- end }}
     access_token: ${SPLUNK_O11Y_ACCESS_TOKEN}
     timeout: 10s
+  {{- end }}
   {{- if eq (include "splunk-otel-collector.sendMetricsToSplunk" .) "true" }}
   splunk_hec/platformMetrics:
     endpoint: {{ .Values.splunkPlatform.endpoint | quote }}

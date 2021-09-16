@@ -403,6 +403,7 @@ exporters:
   # If gateway is disabled, metrics, logs and traces will be sent to to SignalFx backend
   {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
   {{- end }}
+  {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
   signalfx:
     correlation:
     {{- if .Values.gateway.enabled }}
@@ -414,6 +415,7 @@ exporters:
     {{- end }}
     access_token: ${SPLUNK_O11Y_ACCESS_TOKEN}
     sync_host_metadata: true
+  {{- end }}
 service:
   extensions:
     - health_check

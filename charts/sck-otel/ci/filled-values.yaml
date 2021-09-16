@@ -14,6 +14,7 @@ splunkPlatform:
   token: "00000000-0000-0000-0000-000000000000"
   # Optional. Name of the Splunk index targeted.
   index: "main"
+  metrics_index: "metrics"
   # Optional. Default value for `source` field.
   source: "kubernetes"
   # Optional. Default value for `sourcetype` field. For container logs, it will be container name.
@@ -41,6 +42,9 @@ splunkPlatform:
   #       The file will be stored as a secret in kubernetes.
   caFile: |
     caFile
+
+  logsEnabled: true
+  metricsEnabled: true
 
 # Splunk Observability configuration.
 # Fields `realm` and `accessToken` are required to collect and send telemetry data to Splunk Observability Cloud.
@@ -204,8 +208,7 @@ agent:
     podLabel: testing
 
   # Pods scheduling configurations
-  nodeSelector:
-    kubernetes.io/hostname: ip-0-0-0-0.us-west-1.compute.internal
+  nodeSelector: {}
   affinity: {}
 
   # This allows the daemonset to be deployed on master nodes,
@@ -243,32 +246,26 @@ agent:
   ports:
     otlp:
       containerPort: 4317
-      hostPort: 4317
       protocol: TCP
       enabled:  # true for splunkObservability
     sfx-forwarder:
       containerPort: 9080
-      hostPort: 9080
       protocol: TCP
       enabled:  # true for splunkObservability and if tracesEnabled=true
     zipkin:
       containerPort: 9411
-      hostPort: 9411
       protocol: TCP
       enabled:  # true for splunkObservability and if tracesEnabled=true
     jaeger-thrift:
       containerPort: 14268
-      hostPort: 14268
       protocol: TCP
       enabled:  # true for splunkObservability and if tracesEnabled=true
     jaeger-grpc:
       containerPort: 14250
-      hostPort: 14250
       protocol: TCP
       enabled:  # true for splunkObservability and if tracesEnabled=true
     signalfx:
       containerPort: 9943
-      hostPort: 9943
       protocol: TCP
       enabled:  # true for splunkObservability and if metricsEnabled=true
 
