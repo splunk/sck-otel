@@ -1,79 +1,15 @@
 {{/*
-Default memory limiter configuration for OpenTelemetry Collector based on k8s resource limits.
-*/}}
-{{- define "splunk-otel-collector.memoryLimiter" -}}
-# check_interval is the time between measurements of memory usage.
-check_interval: 5s
-# By default limit_mib is set to 80% of ".Values.agent.resources.limits.memory"
-limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
-# Agent will set this value.
-ballast_size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
-{{- end }}
-
-
-{{/*
 Build config file for agent OpenTelemetry Collector
 */}}
 {{- define "splunk-otel-collector.agentCollectorConfig" -}}
 {{- $values := deepCopy .Values | mustMergeOverwrite (deepCopy .Values) }}
 {{- $data := dict "Values" $values | mustMergeOverwrite (deepCopy .) }}
-{{- $config := include "splunk-otel-collector.agent.containerLogsConfig" $data | fromYaml }}
-{{/*{{ printf "%+v" $config }}*/}}
+{{- $config := include "splunk-otel-collector.otelAgentConfig" $data | fromYaml }}
 {{- $config := .Values.agent.config | mustMergeOverwrite $config }}
 {{- include "splunk-otel-collector.agent.hecConfig" . | fromYaml | mustMergeOverwrite $config | toYaml }}
 {{- end }}
 
-{{/*
-Convert memory value from resources.limit to numeric value in MiB to be used by otel memory_limiter processor.
-*/}}
-{{- define "splunk-otel-collector.convertMemToMib" -}}
-{{- $mem := lower . -}}
-{{- if hasSuffix "e" $mem -}}
-{{- trimSuffix "e" $mem | atoi | mul 1000 | mul 1000 | mul 1000 | mul 1000 -}}
-{{- else if hasSuffix "ei" $mem -}}
-{{- trimSuffix "ei" $mem | atoi | mul 1024 | mul 1024 | mul 1024 | mul 1024 -}}
-{{- else if hasSuffix "p" $mem -}}
-{{- trimSuffix "p" $mem | atoi | mul 1000 | mul 1000 | mul 1000 -}}
-{{- else if hasSuffix "pi" $mem -}}
-{{- trimSuffix "pi" $mem | atoi | mul 1024 | mul 1024 | mul 1024 -}}
-{{- else if hasSuffix "t" $mem -}}
-{{- trimSuffix "t" $mem | atoi | mul 1000 | mul 1000 -}}
-{{- else if hasSuffix "ti" $mem -}}
-{{- trimSuffix "ti" $mem | atoi | mul 1024 | mul 1024 -}}
-{{- else if hasSuffix "g" $mem -}}
-{{- trimSuffix "g" $mem | atoi | mul 1000 -}}
-{{- else if hasSuffix "gi" $mem -}}
-{{- trimSuffix "gi" $mem | atoi | mul 1024 -}}
-{{- else if hasSuffix "m" $mem -}}
-{{- div (trimSuffix "m" $mem | atoi | mul 1000) 1024 -}}
-{{- else if hasSuffix "mi" $mem -}}
-{{- trimSuffix "mi" $mem | atoi -}}
-{{- else if hasSuffix "k" $mem -}}
-{{- div (trimSuffix "k" $mem | atoi) 1000 -}}
-{{- else if hasSuffix "ki" $mem -}}
-{{- div (trimSuffix "ki" $mem | atoi) 1024 -}}
-{{- else -}}
-{{- div (div ($mem | atoi) 1024) 1024 -}}
-{{- end -}}
-{{- end -}}
-
-{{- define "splunk-otel-collector.agent.hecConfig" -}}
-exporters:
-  {{- if .Values.splunkPlatform.endpoint }}
-  splunk_hec/platform:
-    splunk_app_name: {{ .Chart.Name }}
-    splunk_app_version: {{ .Chart.Version }}
-  {{- end }}
-  {{- if .Values.splunkObservability.logsEnabled }} # TODO - need to update when metric/trace pipeline is added
-  {{- if or .Values.splunkObservability.ingestUrl .Values.splunkObservability.realm }}
-  splunk_hec/o11y:
-    splunk_app_name: {{ .Chart.Name }}
-    splunk_app_version: {{ .Chart.Version }}
-  {{- end }}
-  {{- end }}
-{{- end }}
-
-{{- define "splunk-otel-collector.agent.containerLogsConfig" -}}
+{{- define "splunk-otel-collector.otelAgentConfig" -}}
 extensions:
   health_check: {}
   file_storage:
@@ -83,7 +19,84 @@ extensions:
 #   should be 90% of the collector's memory.
 #   The simplest way to specify the ballast size is set the value of SPLUNK_BALLAST_SIZE_MIB env variable.
     size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
+  k8s_observer:
+    auth_type: serviceAccount
+    node: ${K8S_NODE_NAME}
+  zpages:
 receivers:
+  {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
+  # Prometheus receiver scraping metrics from the pod itself
+  prometheus/agent:
+    config:
+      scrape_configs:
+      - job_name: 'otel-agent'
+        scrape_interval: 10s
+        static_configs:
+        - targets:
+          - "${K8S_POD_IP}:8889"
+  {{- if eq (include "splunk-otel-collector.collectMetric" .) "true" }}
+  hostmetrics:
+    collection_interval: 10s
+    scrapers:
+      cpu:
+      disk:
+      filesystem:
+      memory:
+      network:
+      # System load average metrics https://en.wikipedia.org/wiki/Load_(computing)
+      load:
+      # Paging/Swap space utilization and I/O metrics
+      paging:
+      # Aggregated system process count metrics
+      processes:
+      # System processes metrics, disabled by default
+      # process:
+
+  receiver_creator:
+    watch_observers: [k8s_observer]
+    receivers:
+      {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
+      prometheus_simple:
+        {{- if .Values.autodetect.prometheus }}
+        # Enable prometheus scraping for pods with standard prometheus annotations
+        rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
+        {{- else }}
+        # Enable prometheus scraping for istio pods only
+        rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && "istio.io/rev" in labels
+        {{- end }}
+        config:
+          metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
+          endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`'
+      {{- end }}
+
+  kubeletstats:
+    collection_interval: 10s
+    auth_type: serviceAccount
+    endpoint: ${K8S_NODE_IP}:10250
+    metric_groups:
+      - container
+      - pod
+      - node
+      # Volume metrics are not collected by default
+      # - volume
+    # To collect metadata from underlying storage resources, set k8s_api_config and list k8s.volume.type
+    # under extra_metadata_labels
+    # k8s_api_config:
+    #  auth_type: serviceAccount
+    extra_metadata_labels:
+      - container.id
+      # - k8s.volume.type
+
+  signalfx:
+    endpoint: 0.0.0.0:9943
+  {{- end }}
+
+  {{- if eq (include "splunk-otel-collector.collectTrace" .) "true" }}
+  smartagent/signalfx-forwarder:
+    type: signalfx-forwarder
+    listenAddress: 0.0.0.0:9080
+  {{- end }}
+
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver
   {{- if .Values.containerLogs.enabled }}
   filelog:
@@ -192,7 +205,7 @@ receivers:
           k8s.pod.uid: 'EXPR($$.uid)'
           run_id: 'EXPR($$.run_id)'
           stream: 'EXPR($$.stream)'
-          container_name: 'EXPR($$.container_name)'
+          k8s.container.name: 'EXPR($$.container_name)'
           k8s.namespace.name: 'EXPR($$.namespace)'
           k8s.pod.name: 'EXPR($$.pod_name)'
           com.splunk.sourcetype: 'EXPR("kube:container:"+$$.container_name)'
@@ -201,7 +214,7 @@ receivers:
         routes:
         {{- range $.Values.containerLogs.multilineSupportConfig }}
         - output: {{ .containerName | quote }}
-          expr: '($$.container_name) == {{ .containerName | quote }}'
+          expr: '($$["k8s.container.name"]) == {{ .containerName | quote }}'
         {{- end }}
         default: clean-up-log-record
       {{- range $.Values.containerLogs.multilineSupportConfig }}
@@ -271,8 +284,9 @@ processors:
           {{ end }}
         {{- end }}
     filter:
-      node_from_env_var: KUBE_NODE_NAME
+      node_from_env_var: K8S_NODE_NAME
   {{- end }}
+  # TODO - when new image is released with source_key, sourtype_key, etc., update this processor and splunk hec exporter config
   resource/splunk:
     attributes:
     - key: host.name
@@ -293,8 +307,45 @@ processors:
     - key: service.name
       from_attribute: k8s.pod.labels.app
       action: upsert
+  {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
+  resource/telemetry:
+    # General resource attributes that apply to all telemetry passing through the agent.
+    attributes:
+      - action: insert
+        key: k8s.node.name
+        value: "${K8S_NODE_NAME}"
+      - action: insert
+        key: k8s.cluster.name
+        value: "{{ .Values.clusterName }}"
+      {{- range $k, $v := .Values.customMetadata }}
+      - action: insert
+        key: {{ $k }}
+        value: {{ $v }}
+      {{- end }}
+
+  # Resource attributes specific to the agent itself.
+  resource/add_agent_k8s:
+    attributes:
+      - action: insert
+        key: k8s.pod.name
+        value: "${K8S_POD_NAME}"
+      - action: insert
+        key: k8s.pod.uid
+        value: "${K8S_POD_UID}"
+      - action: insert
+        key: k8s.namespace.name
+        value: "${K8S_NAMESPACE}"
+
+  {{- if .Values.environment }}
+  resource/add_environment:
+    attributes:
+      - action: insert
+        key: deployment.environment
+        value: "{{ .Values.environment }}"
+  {{- end }}
+  {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
 exporters:
-  {{- if .Values.splunkPlatform.endpoint }}
+  {{- if eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true" }}
   splunk_hec/platform:
     endpoint: {{ .Values.splunkPlatform.endpoint | quote }}
     token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
@@ -315,19 +366,62 @@ exporters:
     {{- if .Values.splunkPlatform.caFile }}
     ca_file: /otel/etc/hec_ca_file
     {{- end }}
+  {{- if eq (include "splunk-otel-collector.sendMetricsToSplunk" .) "true" }}
+  splunk_hec/platformMetrics:
+    endpoint: {{ .Values.splunkPlatform.endpoint | quote }}
+    token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
+    index: {{ .Values.splunkPlatform.metrics_index | quote }}
+    source: {{ .Values.splunkPlatform.source | quote }}
+    sourcetype: {{ .Values.splunkPlatform.sourcetype | quote }}
+    max_connections: {{ .Values.splunkPlatform.max_connections }}
+    disable_compression: {{ .Values.splunkPlatform.disable_compression }}
+    timeout: {{ .Values.splunkPlatform.timeout }}
+    insecure: {{ .Values.splunkPlatform.insecure }}
+    insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
+    {{- if .Values.splunkPlatform.clientCert }}
+    cert_file: /otel/etc/hec_client_cert
+    {{- end }}
+    {{- if .Values.splunkPlatform.clientKey  }}
+    key_file: /otel/etc/hec_client_key
+    {{- end }}
+    {{- if .Values.splunkPlatform.caFile }}
+    ca_file: /otel/etc/hec_ca_file
+    {{- end }}
   {{- end }}
-  {{- if .Values.splunkObservability.logsEnabled }}
-  {{- if or .Values.splunkObservability.ingestUrl .Values.splunkObservability.realm }}
+  {{- end }}
+  {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.ingestUrl" . }}/v1/log
     token: "${SPLUNK_O11Y_ACCESS_TOKEN}"
   {{- end }}
+  {{- if .Values.gateway.enabled }}
+  # If gateway is enabled, metrics, logs and traces will be sent to collector
+  otlp:
+    endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
+    insecure: true
+  {{- else }}
+  # If gateway is disabled, metrics, logs and traces will be sent to to SignalFx backend
+  {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
   {{- end }}
+  signalfx:
+    correlation:
+    {{- if .Values.gateway.enabled }}
+    ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
+    api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
+    {{- else }}
+    ingest_url: {{ include "splunk-otel-collector.ingestUrl" . }}
+    api_url: {{ include "splunk-otel-collector.apiUrl" . }}
+    {{- end }}
+    access_token: ${SPLUNK_O11Y_ACCESS_TOKEN}
+    sync_host_metadata: true
 service:
   extensions:
     - health_check
     - file_storage
+    - k8s_observer
+    - zpages
   pipelines:
+    {{- if eq (include "splunk-otel-collector.collectLog" .) "true" }}
     {{- if .Values.containerLogs.enabled }}
     logs/container:
       receivers:
@@ -335,19 +429,19 @@ service:
       processors:
         - memory_limiter
         - batch
+        - resourcedetection
         {{- if .Values.k8sMetadata.enabled }}
         - k8s_tagger
         {{- end }}
         - resource/splunk
       exporters:
-        {{- if .Values.splunkPlatform.endpoint }}
+        {{- if eq (include "splunk-otel-collector.sendLogsToSplunk" .) "true" }}
         - splunk_hec/platform
         {{- end }}
-        {{- if .Values.splunkObservability.logsEnabled }}
-        {{- if or .Values.splunkObservability.ingestUrl .Values.splunkObservability.realm }}
+        {{- if eq (include "splunk-otel-collector.sendLogsToO11y" .) "true" }}
         - splunk_hec/o11y
         {{- end }}
-        {{- end }}
+    {{- end }}
     {{- end }}
     {{- if .Values.extraFileLogs }}
     logs/extraFiles:
@@ -359,13 +453,78 @@ service:
         - memory_limiter
         - batch
       exporters:
-        {{- if .Values.splunkPlatform.endpoint }}
+        {{- if eq (include "splunk-otel-collector.sendLogsToSplunk" .) "true" }}
         - splunk_hec/platform
         {{- end }}
-        {{- if .Values.splunkObservability.logsEnabled }}
-        {{- if or .Values.splunkObservability.ingestUrl .Values.splunkObservability.realm }}
+        {{- if eq (include "splunk-otel-collector.sendLogsToO11y" .) "true" }}
         - splunk_hec/o11y
         {{- end }}
+    {{- end }}
+    {{- if eq (include "splunk-otel-collector.collectTrace" .) "true" }}
+    # Default traces pipeline.
+    traces:
+      receivers: [otlp, jaeger, smartagent/signalfx-forwarder, zipkin]
+      processors:
+        - memory_limiter
+        - k8s_tagger
+        - batch
+        - resource/telemetry
+        - resourcedetection
+        {{- if .Values.environment }}
+        - resource/add_environment
+        {{- end }}
+      exporters:
+        {{- if .Values.gateway.enabled }}
+        - otlp
+        {{- else }}
+        - sapm
+        {{- end }}
+        {{- if eq (include "splunk-otel-collector.sendMetricsToO11y" .) "true" }}
+        # For trace/metric correlation.
+        - signalfx
+        {{- end }}
+    {{- end }}
+
+    {{- if eq (include "splunk-otel-collector.collectMetric" .) "true" }}
+    # Default metrics pipeline.
+    metrics:
+      receivers: [hostmetrics, kubeletstats, receiver_creator, signalfx]
+      processors:
+        - memory_limiter
+        - batch
+        - resource/telemetry
+        - resourcedetection
+      exporters:
+        {{- if .Values.gateway.enabled }}
+        - otlp
+        {{- else }}
+        {{- if eq (include "splunk-otel-collector.sendMetricsToO11y" .) "true" }}
+        - signalfx
+        {{- end }}
+        {{- if eq (include "splunk-otel-collector.sendMetricsToSplunk" .) "true" }}
+        - splunk_hec/platformMetrics
+        {{- end }}
+        {{- end }}
+    {{- end }}
+
+    {{- if eq (include "splunk-otel-collector.collectMetric" .) "true" }}
+    # Pipeline for metrics collected about the agent pod itself.
+    metrics/agent:
+      receivers: [prometheus/agent]
+      processors:
+        - memory_limiter
+        - batch
+        - resource/telemetry
+        - resource/add_agent_k8s
+        - resourcedetection
+      exporters:
+        # Use signalfx instead of otlp even if collector is enabled
+        # in order to sync host metadata.
+        {{- if eq (include "splunk-otel-collector.sendMetricsToO11y" .) "true" }}
+        - signalfx
+        {{- end }}
+        {{- if eq (include "splunk-otel-collector.sendMetricsToSplunk" .) "true" }}
+        - splunk_hec/platformMetrics
         {{- end }}
     {{- end }}
 {{- end }}

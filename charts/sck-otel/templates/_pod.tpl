@@ -11,7 +11,7 @@ containers:
     command:
       - /{{ .Values.command.name }}
       - --config=/conf/relay.yaml
-      - --metrics-addr=0.0.0.0:8888
+      - --metrics-addr=0.0.0.0:8889
       {{- range .Values.command.extraArgs }}
       - {{ . }}
       {{- end }}
@@ -20,7 +20,7 @@ containers:
     image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
     imagePullPolicy: {{ .Values.image.pullPolicy }}
     ports:
-      {{- range $key, $port := .Values.ports }}
+      {{- range $key, $port := .Values.agent.ports }}
       {{- if $port.enabled }}
       - name: {{ $key }}
         containerPort: {{ $port.containerPort }}
@@ -31,18 +31,49 @@ containers:
       {{- end }}
       {{- end }}
     env:
-      - name: MY_POD_IP
+      - name: K8S_NODE_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: spec.nodeName
+      - name: K8S_NODE_IP
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: status.hostIP
+      - name: K8S_POD_IP
         valueFrom:
           fieldRef:
             apiVersion: v1
             fieldPath: status.podIP
-      - name: SPLUNK_MEMORY_TOTAL_MIB
-        value: "{{ include "splunk-otel-collector.convertMemToMib" .Values.agent.resources.limits.memory }}"
-      - name: KUBE_NODE_NAME
+      - name: K8S_POD_NAME
         valueFrom:
           fieldRef:
-            apiVersion: v1
-            fieldPath: spec.nodeName
+            fieldPath: metadata.name
+      - name: K8S_POD_UID
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.uid
+      - name: K8S_NAMESPACE
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.namespace
+      {{- if .Values.metricsEnabled }}
+      # Env variables for host metrics receiver
+      - name: HOST_PROC
+        value: /hostfs/proc
+      - name: HOST_SYS
+        value: /hostfs/sys
+      - name: HOST_ETC
+        value: /hostfs/etc
+      - name: HOST_VAR
+        value: /hostfs/var
+      - name: HOST_RUN
+        value: /hostfs/run
+      - name: HOST_DEV
+        value: /hostfs/dev
+      {{- end }}
+      - name: SPLUNK_MEMORY_TOTAL_MIB
+        value: "{{ include "splunk-otel-collector.convertMemToMib" .Values.agent.resources.limits.memory }}"
       {{- if .Values.splunkObservability.accessToken }}
       - name: SPLUNK_O11Y_ACCESS_TOKEN
         valueFrom:
