@@ -6,7 +6,8 @@
 - Redesign values.yaml and support O11y for logs (#62)
 
 ### 💡 Enhancements 💡
-- This chart now can send logs to both Splunk platform and Observerability suite
+- This chart now can send logs (#62) and metrics (#64) to both Splunk platform and Observerability suite
+- Support trace data pipeline (#64)
 
 ## v0.3.1
 
