@@ -76,7 +76,7 @@ def test_annotation_routing(setup, index, container_name, expected):
     '''
     logger.info("testing test_annotation_routing pod={0} expected={1} event(s)".format(
         container_name, expected))
-    search_query = "index=" + index + " container_name::" + container_name
+    search_query = "index=" + index + " k8s.container.name::" + container_name
     events = check_events_from_splunk(start_time="-1h@h",
                                       url=setup["splunkd_url"],
                                       user=setup["splunk_user"],
@@ -98,7 +98,7 @@ def test_annotation_excluding(setup, container_name, expected):
     '''
     logger.info("testing test_annotation_excluding pod={0} expected={1} event(s)".format(
         container_name, expected))
-    search_query = "index=*" + " container_name::" + container_name
+    search_query = "index=*" + " k8s.container.name::" + container_name
     events = check_events_from_splunk(start_time="-1h@h",
                                       url=setup["splunkd_url"],
                                       user=setup["splunk_user"],
@@ -208,7 +208,7 @@ def test_host(setup, test_input, host_name, expected):
 @pytest.mark.parametrize("test_input,expected", [
     ("k8s.pod.name", 1),
     ("k8s.namespace.name", 1),
-    ("container_name", 1),
+    ("k8s.container.name", 1),
     ("k8s.pod.uid", 1)
 ])
 def test_default_fields(setup, test_input, expected):

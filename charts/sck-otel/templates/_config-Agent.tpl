@@ -209,15 +209,15 @@ receivers:
           k8s.namespace.name: 'EXPR($$.namespace)'
           k8s.pod.name: 'EXPR($$.pod_name)'
           com.splunk.sourcetype: 'EXPR("kube:container:"+$$.container_name)'
-      {{- if .Values.containerLogs.multilineSupportConfig }}
+      {{- if .Values.containerLogs.multilineConfigs }}
       - type: router
         routes:
-        {{- range $.Values.containerLogs.multilineSupportConfig }}
+        {{- range $.Values.containerLogs.multilineConfigs }}
         - output: {{ .containerName | quote }}
-          expr: '($$["k8s.container.name"]) == {{ .containerName | quote }}'
+          expr: '($$$$resource["k8s.container.name"]) == {{ .containerName | quote }}'
         {{- end }}
         default: clean-up-log-record
-      {{- range $.Values.containerLogs.multilineSupportConfig }}
+      {{- range $.Values.containerLogs.multilineConfigs }}
       - type: recombine
         id: {{.containerName | quote }}
         output: clean-up-log-record
@@ -522,7 +522,7 @@ service:
       exporters:
         # Use signalfx instead of otlp even if collector is enabled
         # in order to sync host metadata.
-        {{- if eq (include "splunk-otel-collector.sendMetricsToO11y" .) "true" }}
+        {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
         - signalfx
         {{- end }}
         {{- if eq (include "splunk-otel-collector.sendMetricsToSplunk" .) "true" }}

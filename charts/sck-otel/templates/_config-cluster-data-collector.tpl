@@ -126,7 +126,7 @@ service:
         - resource/add_collector_k8s
         - resourcedetection
       exporters: 
-        {{- if eq (include "splunk-otel-collector.sendMetricsToO11y" .) "true" }}
+        {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
         - signalfx
         {{- end }}
         {{- if eq (include "splunk-otel-collector.sendMetricsToSplunk" .) "true" }}
