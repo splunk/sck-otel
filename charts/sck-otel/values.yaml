@@ -24,7 +24,7 @@ splunkPlatform:
   disable_compression: true
   # HTTP timeout when sending data. Defaults to 10s.
   timeout: 10s
-  # Whether to skip checking the certificate of the HEC endpoint when sending data over HTTPS. Defaults to true.
+  # Whether to skip checking the certificate of the HEC endpoint when sending data over HTTPS. Defaults to false.
   insecure_skip_verify: false
   # The PEM-format CA certificate for this client.
   # NOTE: The content of the certificate itself should be used here, not the file path.
@@ -167,7 +167,8 @@ extraFileLogs: {}
 
 # Configurations for journald logs
 journaldLogs:
-  enabled: true
+# keeping the default false until journald receiver is part of splunkotel distro
+  enabled: false
   directory: /run/log/journal
   priority: info
   units:
