@@ -392,5 +392,6 @@ service:
         - splunk_hec/o11y
         {{- end }}
         {{- end }}
-      {{- end }}
+    {{- end }}
+{{- end }}
 {{- end }}
