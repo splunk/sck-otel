@@ -71,8 +71,10 @@ containers:
     resources:
       {{- toYaml .Values.agent.resources | nindent 6 }}
     volumeMounts:
+      {{- if .Values.journaldLogs.enabled }}
       - name: journalpath
         mountPath: /run/log/journal
+      {{- end }}
       - mountPath: /conf
         name: {{ .Chart.Name }}-configmap
       {{- if .Values.agent.extraVolumeMounts}}
@@ -96,9 +98,11 @@ containers:
         readOnly: true
       {{- end }}
 volumes:
+  {{- if .Values.journaldLogs.enabled }}
   - name: journalpath
     hostPath:
       path: /run/log/journal
+  {{- end }}
   - name: {{ .Chart.Name }}-configmap
     configMap:
       name: {{ include "splunk-otel-collector.fullname" . }}
