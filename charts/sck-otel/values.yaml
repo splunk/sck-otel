@@ -165,6 +165,16 @@ extraFileLogs: {}
 #       hostPath:
 #         path: /var/log/kubernetes/apiserver
 
+# Configurations for journald logs
+journaldLogs:
+  enabled: true
+  directory: /run/log/journal
+  priority: info
+  units:
+    - ssh
+    - kubelet
+    - docker
+    - containerd
 
 # Persistent storage path for storing logs checkpoints
 checkpointPath: "/var/lib/otel_pos"
