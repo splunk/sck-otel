@@ -546,11 +546,10 @@ service:
         - batch
         - resource/splunk
       exporters:
-        {{- if .Values.splunkPlatform.endpoint }}
+        {{- if eq (include "splunk-otel-collector.sendLogsToSplunk" .) "true" }}
         - splunk_hec/platform
         {{- end }}
-        {{- if .Values.splunkObservability.logsEnabled }}
-        {{- if or .Values.splunkObservability.ingestUrl .Values.splunkObservability.realm }}
+        {{- if eq (include "splunk-otel-collector.sendLogsToO11y" .) "true" }}
         - splunk_hec/o11y
         {{- end }}
         {{- end }}
