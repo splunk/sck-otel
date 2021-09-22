@@ -73,7 +73,7 @@ containers:
     volumeMounts:
       {{- if .Values.journaldLogs.enabled }}
       - name: journalpath
-        mountPath: /run/log/journal
+        mountPath: {{ .Values.journaldLogs.directory }}
       {{- end }}
       - mountPath: /conf
         name: {{ .Chart.Name }}-configmap
@@ -101,7 +101,7 @@ volumes:
   {{- if .Values.journaldLogs.enabled }}
   - name: journalpath
     hostPath:
-      path: /run/log/journal
+      path: {{.Values.journaldLogs.directory }}
   {{- end }}
   - name: {{ .Chart.Name }}-configmap
     configMap:
