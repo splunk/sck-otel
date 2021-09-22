@@ -552,6 +552,5 @@ service:
         {{- if eq (include "splunk-otel-collector.sendLogsToO11y" .) "true" }}
         - splunk_hec/o11y
         {{- end }}
-        {{- end }}
     {{- end }}
 {{- end }}
