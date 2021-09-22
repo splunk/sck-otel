@@ -57,7 +57,7 @@ containers:
         valueFrom:
           fieldRef:
             fieldPath: metadata.namespace
-      {{- if .Values.metricsEnabled }}
+      {{- if eq (include "splunk-otel-collector.collectMetric" .) "true" }}
       # Env variables for host metrics receiver
       - name: HOST_PROC
         value: /hostfs/proc
