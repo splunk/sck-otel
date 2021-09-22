@@ -30,6 +30,7 @@ receivers:
     directory: {{- toYaml .Values.journaldLogs.directory | nindent 6 }}
     units: {{- toYaml .Values.journaldLogs.units | nindent 8 }}
     priority: {{- toYaml .Values.journaldLogs.priority | nindent 6 }}
+  {{- end }}
   {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
   # Prometheus receiver scraping metrics from the pod itself
   prometheus/agent:
@@ -552,5 +553,4 @@ service:
         - splunk_hec/o11y
         {{- end }}
     {{- end }}
-{{- end }}
 {{- end }}
