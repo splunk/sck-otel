@@ -14,3 +14,33 @@ splunkObservability:
   logsEnabled: true
   metricsEnabled: true
   tracesEnabled: true
+agent:
+  ports:
+    otlp:
+      containerPort: 4317
+      protocol: TCP
+      enabled: true
+    sfx-forwarder:
+      containerPort: 9080
+      protocol: TCP
+      enabled: true
+    zipkin:
+      containerPort: 9411
+      protocol: TCP
+      enabled: true
+    jaeger-thrift:
+      containerPort: 14268
+      protocol: TCP
+      enabled: true
+    jaeger-grpc:
+      containerPort: 14250
+      protocol: TCP
+      enabled: true
+    signalfx:
+      containerPort: 9943
+      protocol: TCP
+      enabled: true
+clusterDataCollector:
+  tolerations:
+    - key: node-role.kubernetes.io/master
+      effect: NoSchedule

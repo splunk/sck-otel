@@ -14,6 +14,8 @@ splunkPlatform:
   token:
   # Optional. Name of the Splunk index targeted.
   index:
+  # Optional. Name of the Splunk metrics index targeted. Required if sending metric data to Splunk platform.
+  metrics_index:
   # Optional. Default value for `source` field.
   source: "kubernetes"
   # Optional. Default value for `sourcetype` field. For container logs, it will be container name.
@@ -38,6 +40,10 @@ splunkPlatform:
   # NOTE: The content of the file itself should be used here, not the file path.
   #       The file will be stored as a secret in kubernetes.
   caFile:
+
+  # Options to disable particular telemetry data types that will be sent to Splunk Platform.
+  logsEnabled: true
+  metricsEnabled: true
 
 # Splunk Observability configuration.
 # Fields `realm` and `accessToken` are required to collect and send telemetry data to Splunk Observability Cloud.
@@ -154,7 +160,7 @@ extraFileLogs: {}
 #     include_file_name: false
 #     resource:
 #       service.name: /var/log/kubernetes/apiserver/audit.log
-#       host.name: 'EXPR(env("KUBE_NODE_NAME"))'
+#       host.name: 'EXPR(env("K8S_NODE_NAME"))'
 #       com.splunk.sourcetype: kube:apiserver-audit
 # agent:
 #   extraVolumeMounts:
@@ -232,32 +238,32 @@ agent:
       containerPort: 4317
       hostPort: 4317
       protocol: TCP
-      enabled:  # true for splunkObservability
+      enabled: true
     sfx-forwarder:
       containerPort: 9080
       hostPort: 9080
       protocol: TCP
-      enabled:  # true for splunkObservability and if tracesEnabled=true
+      enabled: true
     zipkin:
       containerPort: 9411
       hostPort: 9411
       protocol: TCP
-      enabled:  # true for splunkObservability and if tracesEnabled=true
+      enabled: true
     jaeger-thrift:
       containerPort: 14268
       hostPort: 14268
       protocol: TCP
-      enabled:  # true for splunkObservability and if tracesEnabled=true
+      enabled: true
     jaeger-grpc:
       containerPort: 14250
       hostPort: 14250
       protocol: TCP
-      enabled:  # true for splunkObservability and if tracesEnabled=true
+      enabled: true
     signalfx:
       containerPort: 9943
       hostPort: 9943
       protocol: TCP
-      enabled:  # true for splunkObservability and if metricsEnabled=true
+      enabled: true
 
   # Configuration override that will be merged into the agent's default config
   # Example - this will replace `splunk_hec` with `logging` exporter for container logs
@@ -299,12 +305,11 @@ secret:
   create: true
   name:
 
-# (To Be Implemented)
 # Configuration for additional OTel collector deployment fetching data
 # from the Kubernetes API and sending it to Observability Cloud as metrics and
 # to Splunk Platform as Kubernetes objects (to be added later).
 clusterDataCollector:
-  enabled:  # true if splunkObservability enabled
+  enabled: true
 
   # Need to be adjusted based on size of monitored cluster
   resources:
