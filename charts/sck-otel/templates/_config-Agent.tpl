@@ -511,7 +511,7 @@ service:
         {{- end }}
     {{- end }}
 
-    {{- if eq (include "splunk-otel-collector.collectMetric" .) "true" }}
+    {{- if or (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (eq (include "splunk-otel-collector.sendMetricsToSplunk" .) "true") }}
     # Pipeline for metrics collected about the agent pod itself.
     metrics/agent:
       receivers: [prometheus/agent]
