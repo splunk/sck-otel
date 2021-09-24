@@ -30,6 +30,12 @@ receivers:
     directory: {{- toYaml .Values.journaldLogs.directory | nindent 6 }}
     units: {{- toYaml .Values.journaldLogs.units | nindent 8 }}
     priority: {{- toYaml .Values.journaldLogs.priority | nindent 6 }}
+    resource:
+      com.splunk.source: {{.Values.journaldLogs.directory}}
+      com.splunk.sourcetype: 'EXPR("kube:"+$._SYSTEMD_UNIT)'
+      com.splunk.index: {{ .Values.journaldLogs.index}}
+
+
   {{- end }}
   {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
   # Prometheus receiver scraping metrics from the pod itself

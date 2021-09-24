@@ -182,6 +182,8 @@ journaldLogs:
     - kubelet
     - docker
     - containerd
+# Route journald logs to its own Splunk Index by specifying the index value below, else leave it blank. Please make sure the index exist in Splunk and is configured to receive HEC traffic
+    index:
 
 # Persistent storage path for storing logs checkpoints
 checkpointPath: "/var/lib/otel_pos"
