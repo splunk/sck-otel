@@ -32,11 +32,20 @@ receivers:
     priority: {{- toYaml .Values.journaldLogs.priority | nindent 6 }}
     resource:
       com.splunk.source: {{.Values.journaldLogs.directory}}
-      com.splunk.sourcetype: 'EXPR("kube:"+$._SYSTEMD_UNIT)'
-      com.splunk.index: {{ .Values.journaldLogs.index}}
-
-
+      com.splunk.sourcetype: 'EXPR("kube:"+$$._SYSTEMD_UNIT)'
+      com.splunk.index: {{ .Values.journaldLogs.index | default .Values.splunkPlatform.index}}
+      host.name: 'EXPR(env("K8S_NODE_NAME"))'
+      {{- if .Values.clusterName }}
+      k8s.cluster.name: {{ .Values.clusterName }}
+      {{- end }}
+      {{- if .Values.environment }}
+      deployment.environment: {{ .Values.environment }}
+      {{- end }}
+      {{- if .Values.customMetadata }}
+      {{- toYaml .Values.customMetadata | nindent 6 }}
+      {{- end }}
   {{- end }}
+
   {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
   # Prometheus receiver scraping metrics from the pod itself
   prometheus/agent:
@@ -47,6 +56,7 @@ receivers:
         static_configs:
         - targets:
           - "${K8S_POD_IP}:8889"
+
   {{- if eq (include "splunk-otel-collector.collectMetric" .) "true" }}
   hostmetrics:
     collection_interval: 10s
@@ -544,13 +554,13 @@ service:
         - splunk_hec/platformMetrics
         {{- end }}
     {{- end }}
+    {{- if eq (include "splunk-otel-collector.collectLog" .) "true" }}
     {{- if .Values.journaldLogs.enabled }}
     logs/journald:
       receivers:
         - journald
       processors:
         - batch
-        - resource/splunk
       exporters:
         {{- if eq (include "splunk-otel-collector.sendLogsToSplunk" .) "true" }}
         - splunk_hec/platform
@@ -558,5 +568,6 @@ service:
         {{- if eq (include "splunk-otel-collector.sendLogsToO11y" .) "true" }}
         - splunk_hec/o11y
         {{- end }}
+    {{- end }}
     {{- end }}
 {{- end }}
