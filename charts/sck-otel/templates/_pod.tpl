@@ -128,6 +128,12 @@ containers:
         mountPath: /otel/etc
         readOnly: true
       {{- end }}
+      {{- if eq (include "splunk-otel-collector.collectMetric" .) "true" }}
+      - mountPath: /hostfs
+        name: hostfs
+        readOnly: true
+        mountPropagation: HostToContainer
+      {{- end }}
 volumes:
   {{- if .Values.journaldLogs.enabled }}
   - name: journalpath
@@ -161,6 +167,11 @@ volumes:
   - name: secret
     secret:
       secretName: {{ template "splunk-otel-collector.secret" . }}-cert
+  {{- end }}
+  {{- if eq (include "splunk-otel-collector.collectMetric" .) "true" }}
+  - name: hostfs
+    hostPath:
+      path: /
   {{- end }}
 {{- with .Values.agent.nodeSelector }}
 nodeSelector:
