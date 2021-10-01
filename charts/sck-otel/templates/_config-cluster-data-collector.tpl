@@ -17,7 +17,9 @@ receivers:
         - targets: ["${K8S_POD_IP}:8889"]
   k8s_cluster:
     auth_type: serviceAccount
+    {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
     metadata_exporters: [signalfx]
+    {{- end }}
 
 processors:
   memory_limiter:
