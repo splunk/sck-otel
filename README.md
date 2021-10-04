@@ -38,7 +38,7 @@ If you do not configure this index, Splunk Connect for Kubernetes-OpenTelemetry 
 
 It is best practice to run pods as a non-root user. To avoid running collector pod as `root` user, perform below steps on each kubernetes nodes.
 
-In this chart, it is set to run as as a user with UID and GID of `10001` ([set here](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml#L104)). But this user does not have the permission to read container log files typically owned by `root`. Below steps create a user with GID 10001 and grant access to that GID. 
+In this chart, it is set to run as as a user with UID and GID of `10001` ([set here](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml#L104)). But this user does not have the permission to read container log files typically owned by `root`. Below steps create a user with GID 10001 and grant access to that GID.
 
 ```bash
 # create a user otel with uid=10001 and gid=10001
@@ -49,29 +49,29 @@ sudo mkdir /var/lib/otel_pos
 sudo chgrp otel /var/lib/otel_pos
 sudo chmod g+rwx /var/lib/otel_pos
 
-# setup container log directories. 
+# setup container log directories.
 # To check where the files are, check symlinks file on `/var/log/pods/` and its target paths.
 ls -Rl /var/log/pods
 # default paths are these
-# `/var/lib/docker/containers` for docker 
+# `/var/lib/docker/containers` for docker
 # `/var/log/crio/pods` for cri-o
 # `/var/log/pods` for containerd
 # add your container log path if different
-if [ -d "/var/lib/docker/containers" ] 
+if [ -d "/var/lib/docker/containers" ]
 then
     sudo chgrp -R otel /var/lib/docker/containers
     sudo chmod -R g+rwx /var/lib/docker/containers
     sudo setfacl -Rm d:g:otel:rwx,g:otel:rwx /var/lib/docker/containers
 fi
 
-if [ -d "/var/log/crio/pods" ] 
+if [ -d "/var/log/crio/pods" ]
 then
     sudo chgrp -R otel /var/log/crio/pods
     sudo chmod -R g+rwx /var/log/crio/pods
     sudo setfacl -Rm d:g:otel:rwx,g:otel:rwx /var/log/crio/pods
 fi
 
-if [ -d "/var/log/pods" ] 
+if [ -d "/var/log/pods" ]
 then
     sudo chgrp -R otel /var/log/pods
     sudo chmod -R g+rwx /var/log/pods
@@ -203,6 +203,8 @@ Splunk Connect for Kubernetes-OpenTelmetry supports parsing of multiline logs to
 Process multiline logs by configuring `multilineSupportConfig` section in values.yaml.
 
 [Example](https://github.com/splunk/sck-otel/blob/9bd92b9b2054b85eadfd744888cc19ebb46b0081/charts/sck-otel/values.yaml#L77)
+
+If you have a specific format you are using for formatting a python stack traces, you can take an example of your stack trace output and use https://regex101.com/  to find a golang regex that works for your format and specify it in the config file for the config option "first_entry_regex" and for the config option pass in the appropriate container name.
 
 ## Tweak Performance/resources used by Splunk Connect for Kubernetes-OpenTelemetry
 If you want to tweak performance/cpu and memory resources used by  Splunk Connect for Kubernetes-OpenTelemetry change the available cpu and memory for the Opentelemtry Agent by configuring resources:limits:cpu and resources:limits:memory in the values.yaml file used to deploy Splunk Connect for Kubernetes-OpenTelemetry.

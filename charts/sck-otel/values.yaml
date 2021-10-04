@@ -132,6 +132,22 @@ containerLogs:
   # Multiline logs currently support only container name which is not unique within the cluster.
   # Can we also support k8s object owner name (deployment, daemonset, statefulset) along with namespace?
   multilineConfigs: []
+  # Example configuration for processing and handling multiline logs/ java stack trace from test container "buttercup-app-python" by specifying  a regular expression (first_entry_regex) to parse first entry in a multiline log series.
+  # Sample python stack trace/ multiline log from container "buttercup-app-python"
+  # .........
+  # Traceback (most recent call last):
+  #   File "/path/to/example.py", line 3, in <module>
+  #     greet(1)
+  #   File "/path/to/greetings.py", line 5, in greet
+  #     print(greeting + ', ' + who_to_greet(someone))
+  # TypeError: must be str, not int
+  # .........
+  #
+  # Sample configuration to handle multiline python stack trace from buttercup-app-python container
+  # multilineConfigs:
+  #  - containerName: buttercup-app-python
+  #    first_entry_regex: ^Traceback \(most recent call last\):$
+  #
   #  Example configuration for processing and handling multiline logs/ java stack trace from test container "buttercup-app" by specifying  a regular expression (first_entry_regex) to parse first entry in a multiline log series.
   #  Sample java stack trace/ multiline log from container "buttercup-app"
   #  .........
