@@ -38,7 +38,7 @@ If you do not configure this index, Splunk Connect for Kubernetes-OpenTelemetry 
 
 It is best practice to run pods as a non-root user. To avoid running collector pod as `root` user, perform below steps on each kubernetes nodes.
 
-In this chart, it is set to run as as a user with UID and GID of `10001` ([set here](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml#L104)). But this user does not have the permission to read container log files typically owned by `root`. Below steps create a user with GID 10001 and grant access to that GID. 
+In this chart, it is set to run as as a user with UID and GID of `10001` ([set here](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml#L104)). But this user does not have the permission to read container log files typically owned by `root`. Below steps create a user with GID 10001 and grant access to that GID.
 
 ```bash
 # create a user otel with uid=10001 and gid=10001
@@ -49,29 +49,29 @@ sudo mkdir /var/lib/otel_pos
 sudo chgrp otel /var/lib/otel_pos
 sudo chmod g+rwx /var/lib/otel_pos
 
-# setup container log directories. 
+# setup container log directories.
 # To check where the files are, check symlinks file on `/var/log/pods/` and its target paths.
 ls -Rl /var/log/pods
 # default paths are these
-# `/var/lib/docker/containers` for docker 
+# `/var/lib/docker/containers` for docker
 # `/var/log/crio/pods` for cri-o
 # `/var/log/pods` for containerd
 # add your container log path if different
-if [ -d "/var/lib/docker/containers" ] 
+if [ -d "/var/lib/docker/containers" ]
 then
     sudo chgrp -R otel /var/lib/docker/containers
     sudo chmod -R g+rwx /var/lib/docker/containers
     sudo setfacl -Rm d:g:otel:rwx,g:otel:rwx /var/lib/docker/containers
 fi
 
-if [ -d "/var/log/crio/pods" ] 
+if [ -d "/var/log/crio/pods" ]
 then
     sudo chgrp -R otel /var/log/crio/pods
     sudo chmod -R g+rwx /var/log/crio/pods
     sudo setfacl -Rm d:g:otel:rwx,g:otel:rwx /var/log/crio/pods
 fi
 
-if [ -d "/var/log/pods" ] 
+if [ -d "/var/log/pods" ]
 then
     sudo chgrp -R otel /var/log/pods
     sudo chmod -R g+rwx /var/log/pods
@@ -165,8 +165,7 @@ Manage Splunk Connect for Kubernetes-OpenTelemetry Logging with these supported 
 * Use `splunk.com/index` annotation on pod and/or namespace to tell which Splunk platform indexes to ingest to. Pod annotation will take precedence over namespace annotation when both are annotated.
   ex) `kubectl annotate namespace kube-system splunk.com/index=k8s_events`
 * Use `splunk.com/sourcetype` annotation on pod to overwrite `sourcetype` field. If not set, it is dynamically generated to be `kube:container:CONTAINER_NAME` where CONTAINER_NAME is the container name of the container running in the pod.
-
-
+* Set `splunk.com/exclude` annotation to true on pod and/or namespace to exclude its logs from ingested to your Splunk platform deployment.
 # Search for Splunk Connect for Kubernetes-OpenTelemetry metadata in Splunk
 Splunk Connect for Kubernetes-OpenTelemetry sends events to Splunk which can contain extra meta-data attached to each event. Metadata values such as "k8s.pod.name", "k8s.pod.uid", "k8s.deployment.name","k8s.cluster.name", "k8s.namespace.name", "k8s.node.name", "k8s.pod.start_time", "container_name", "run_id" and "stream" will appear as fields when viewing the event data inside Splunk.
 There are two solutions for running searches in Splunk on meta-data.

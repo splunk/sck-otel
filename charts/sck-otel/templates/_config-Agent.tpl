@@ -370,7 +370,7 @@ processors:
   {{- end }}
   filter/namespacelogs:
     logs:
-      # any logs matching filters are excluded from remainder of pipeline
+      # any logs matching the namespace exclude annotation are excluded from remainder of pipeline
       exclude:
         match_type: strict
         resource_attributes:
@@ -378,7 +378,7 @@ processors:
             value: "true"
   filter/podlogs:
     logs:
-      # any logs matching filters are excluded from remainder of pipeline
+      # any logs matching the pod exclude annotation are excluded from remainder of pipeline
       exclude:
         match_type: strict
         resource_attributes:
