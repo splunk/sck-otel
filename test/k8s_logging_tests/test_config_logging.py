@@ -87,7 +87,6 @@ def test_annotation_routing(setup, index, container_name, expected):
                 len(events))
     assert len(events) >= expected
 
-@pytest.mark.skipif(True, reason="Jira: ADDON-35331")
 @pytest.mark.parametrize("container_name,expected", [
     ("pod-w-index-w-ns-exclude", 0),
     ("pod-w-exclude-wo-ns-exclude", 0)
