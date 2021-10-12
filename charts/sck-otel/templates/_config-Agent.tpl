@@ -26,26 +26,33 @@ extensions:
 receivers:
 # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/journaldreceiver
   {{- if .Values.journaldLogs.enabled }}
-  journald:
-    directory: {{- toYaml .Values.journaldLogs.directory | nindent 6 }}
-    units: {{- toYaml .Values.journaldLogs.units | nindent 8 }}
-    priority: {{- toYaml .Values.journaldLogs.priority | nindent 6 }}
+  {{- if .Values.journaldLogs.units }}
+  {{- range $_, $unit := .Values.journaldLogs.units }}
+  {{- printf "journald/%s:" $unit.name | nindent 2 }}
+    directory: {{ $.Values.journaldLogs.directory }}
+    units: [{{ $unit.name }}]
+    priority: {{ $unit.priority | default $.Values.journaldLogs.defaultPriority }}
     resource:
-      com.splunk.source: {{.Values.journaldLogs.directory}}
+      com.splunk.source: {{ $.Values.journaldLogs.directory }}
       com.splunk.sourcetype: 'EXPR("kube:"+$$._SYSTEMD_UNIT)'
-      com.splunk.index: {{ .Values.journaldLogs.index | default .Values.splunkPlatform.index}}
+      com.splunk.index: {{ $.Values.journaldLogs.index | default $.Values.splunkPlatform.index}}
       host.name: 'EXPR(env("K8S_NODE_NAME"))'
-      {{- if .Values.clusterName }}
-      k8s.cluster.name: {{ .Values.clusterName }}
+      {{- if $.Values.clusterName }}
+      k8s.cluster.name: {{ $.Values.clusterName }}
       {{- end }}
-      {{- if .Values.environment }}
-      deployment.environment: {{ .Values.environment }}
+      {{- if $.Values.environment }}
+      deployment.environment: {{ $.Values.environment }}
       {{- end }}
-      {{- if .Values.customMetadata }}
-      {{- toYaml .Values.customMetadata | nindent 6 }}
+      {{- if $.Values.customMetadata }}
+      {{- toYaml $.Values.customMetadata | nindent 6 }}
       {{- end }}
   {{- end }}
-
+  {{- else }}
+  journald:
+    directory: {{- toYaml .Values.journaldLogs.directory | nindent 6 }}
+    priority: {{ .Values.journaldLogs.defaultPriority }}
+  {{- end }}
+  {{- end }}
   {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
   # Prometheus receiver scraping metrics from the pod itself
   prometheus/agent:
@@ -558,7 +565,13 @@ service:
     {{- if .Values.journaldLogs.enabled }}
     logs/journald:
       receivers:
+        {{- if .Values.journaldLogs.units }}
+        {{- range $_, $unit := .Values.journaldLogs.units }}
+        {{- printf "- journald/%s" $unit.name | nindent 8 }}
+        {{- end }}
+        {{- else }}
         - journald
+        {{- end }}
       processors:
         - batch
       exporters:
