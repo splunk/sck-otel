@@ -8,7 +8,8 @@
 ### 💡 Enhancements 💡
 - This chart now can send logs (#62) and metrics (#64) to both Splunk platform and Observerability suite
 - Support trace data pipeline (#64)
-
+- Flexible Journald log source (#76)
+  
 ## v0.3.1
 
 ### 🧰 Bug fixes 🧰
