@@ -403,17 +403,18 @@ exporters:
     max_connections: {{ .Values.splunkPlatform.max_connections }}
     disable_compression: {{ .Values.splunkPlatform.disable_compression }}
     timeout: {{ .Values.splunkPlatform.timeout }}
-    insecure: {{ .Values.splunkPlatform.insecure }}
-    insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
-    {{- if .Values.splunkPlatform.clientCert }}
-    cert_file: /otel/etc/hec_client_cert
-    {{- end }}
-    {{- if .Values.splunkPlatform.clientKey  }}
-    key_file: /otel/etc/hec_client_key
-    {{- end }}
-    {{- if .Values.splunkPlatform.caFile }}
-    ca_file: /otel/etc/hec_ca_file
-    {{- end }}
+    tls:
+      insecure: {{ .Values.splunkPlatform.insecure }}
+      insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
+      {{- if .Values.splunkPlatform.clientCert }}
+      cert_file: /otel/etc/hec_client_cert
+      {{- end }}
+      {{- if .Values.splunkPlatform.clientKey  }}
+      key_file: /otel/etc/hec_client_key
+      {{- end }}
+      {{- if .Values.splunkPlatform.caFile }}
+      ca_file: /otel/etc/hec_ca_file
+      {{- end }}
   {{- if eq (include "splunk-otel-collector.sendMetricsToSplunk" .) "true" }}
   splunk_hec/platformMetrics:
     endpoint: {{ .Values.splunkPlatform.endpoint | quote }}
@@ -424,17 +425,18 @@ exporters:
     max_connections: {{ .Values.splunkPlatform.max_connections }}
     disable_compression: {{ .Values.splunkPlatform.disable_compression }}
     timeout: {{ .Values.splunkPlatform.timeout }}
-    insecure: {{ .Values.splunkPlatform.insecure }}
-    insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
-    {{- if .Values.splunkPlatform.clientCert }}
-    cert_file: /otel/etc/hec_client_cert
-    {{- end }}
-    {{- if .Values.splunkPlatform.clientKey  }}
-    key_file: /otel/etc/hec_client_key
-    {{- end }}
-    {{- if .Values.splunkPlatform.caFile }}
-    ca_file: /otel/etc/hec_ca_file
-    {{- end }}
+    tls:
+      insecure: {{ .Values.splunkPlatform.insecure }}
+      insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
+      {{- if .Values.splunkPlatform.clientCert }}
+      cert_file: /otel/etc/hec_client_cert
+      {{- end }}
+      {{- if .Values.splunkPlatform.clientKey  }}
+      key_file: /otel/etc/hec_client_key
+      {{- end }}
+      {{- if .Values.splunkPlatform.caFile }}
+      ca_file: /otel/etc/hec_ca_file
+      {{- end }}
   {{- end }}
   {{- end }}
   {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
