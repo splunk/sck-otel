@@ -166,6 +166,9 @@ Manage Splunk Connect for Kubernetes-OpenTelemetry Logging with these supported 
   ex) `kubectl annotate namespace kube-system splunk.com/index=k8s_events`
 * Use `splunk.com/sourcetype` annotation on pod to overwrite `sourcetype` field. If not set, it is dynamically generated to be `kube:container:CONTAINER_NAME` where CONTAINER_NAME is the container name of the container running in the pod.
 * Set `splunk.com/exclude` annotation to true on pod and/or namespace to exclude its logs from ingested to your Splunk platform deployment.
+* Set `splunk.com/include` annotation to true on pod and `exclusiveFiltering.enabled` flag to `true` to include its logs from ingested to your Splunk platform deployment.
+  All other logs will be ignored. You cant use this feature with the above mentioned exclude feature. You can only use either the include feature or the exclude feature.
+
 # Search for Splunk Connect for Kubernetes-OpenTelemetry metadata in Splunk
 Splunk Connect for Kubernetes-OpenTelemetry sends events to Splunk which can contain extra meta-data attached to each event. Metadata values such as "k8s.pod.name", "k8s.pod.uid", "k8s.deployment.name","k8s.cluster.name", "k8s.namespace.name", "k8s.node.name", "k8s.pod.start_time", "container_name", "run_id" and "stream" will appear as fields when viewing the event data inside Splunk.
 There are two solutions for running searches in Splunk on meta-data.

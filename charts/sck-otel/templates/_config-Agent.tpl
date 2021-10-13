@@ -300,6 +300,8 @@ processors:
           from: pod
         - key: splunk.com/exclude
           from: pod
+        - key: splunk.com/include
+          from: pod
         - key: splunk.com/index
           from: namespace
         - key: splunk.com/exclude
@@ -377,7 +379,19 @@ processors:
         key: deployment.environment
         value: "{{ .Values.environment }}"
   {{- end }}
-  filter/namespacelogs:
+
+  {{- if .Values.exclusiveFiltering.enabled }}
+  # If exclusive_filtering is enabled, only logs for pods with include annotation are ingested
+  filter/include_pod_logs:
+    logs:
+      # any logs matching the pod include annotation are included and the rest are excluded from remainder of pipeline
+      include:
+        match_type: strict
+        resource_attributes:
+          - key: k8s.pod.annotations.splunk.com/include
+            value: "true"
+  {{- else }}
+  filter/exclude_namespace_logs:
     logs:
       # any logs matching the namespace exclude annotation are excluded from remainder of pipeline
       exclude:
@@ -385,7 +399,7 @@ processors:
         resource_attributes:
           - key: k8s.namespace.annotations.splunk.com/exclude
             value: "true"
-  filter/podlogs:
+  filter/exclude_pod_logs:
     logs:
       # any logs matching the pod exclude annotation are excluded from remainder of pipeline
       exclude:
@@ -393,6 +407,8 @@ processors:
         resource_attributes:
           - key: k8s.pod.annotations.splunk.com/exclude
             value: "true"
+  {{- end }}
+
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
 exporters:
   {{- if eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true" }}
@@ -489,8 +505,12 @@ service:
         {{- end }}
         - resource/splunk
         - resource/splunk2
-        - filter/namespacelogs
-        - filter/podlogs
+        {{- if .Values.exclusiveFiltering.enabled }}
+        - filter/include_pod_logs
+        {{- else }}
+        - filter/exclude_pod_logs
+        - filter/exclude_namespace_logs
+        {{- end }}
       exporters:
         {{- if eq (include "splunk-otel-collector.sendLogsToSplunk" .) "true" }}
         - splunk_hec/platform

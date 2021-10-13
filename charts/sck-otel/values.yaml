@@ -207,6 +207,9 @@ journaldLogs:
 # Persistent storage path for storing logs checkpoints
 checkpointPath: "/var/lib/otel_pos"
 
+exclusiveFiltering:
+  enabled: false
+
 # Configuration specific to OTel agent - a daemonset responsible for collecting telemetry data from each k8s node.
 agent:
   enabled: true
