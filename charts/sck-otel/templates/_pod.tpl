@@ -10,7 +10,7 @@ initContainers:
   - name: migratechkpt
     image: rock1017/otelcol:1.0.0
     imagePullPolicy: Always
-    command: ["migratecheckpoint"]
+    command: ["/migratecheckpoint"]
     env:
       - name: CONTAINER_LOG_PATH_FLUENTD
         value: "/var/log/splunk-fluentd-containers.log.pos"
