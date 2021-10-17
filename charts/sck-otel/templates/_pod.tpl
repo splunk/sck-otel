@@ -6,6 +6,35 @@ imagePullSecrets:
 serviceAccountName: {{ include "splunk-otel-collector.serviceAccountName" . }}
 securityContext:
   {{- toYaml .Values.agent.podSecurityContext | nindent 2 }}
+initContainers:
+  - name: migratechkpt
+    image: rock1017/otelcol:1.0.0
+    imagePullPolicy: Always
+    command: ["migratecheckpoint"]
+    env:
+      - name: CONTAINER_LOG_PATH_FLUENTD
+        value: "/var/log/splunk-fluentd-containers.log.pos"
+      - name: CONTAINER_LOG_PATH_OTEL
+        value: "/var/lib/otel_pos/receiver_filelog_"
+      - name: CUSTOM_LOG_PATH_FLUENTD
+        value: "/var/log/splunk-fluentd-*.pos"
+      - name: CUSTOM_LOG_PATH_OTEL
+        value: "/var/lib/otel_pos/receiver_filelog_"
+      - name: CUSTOM_LOG_CAPTURE_REGEX
+        value: "\\/splunk\\-fluentd\\-(?P<name>[\\w0-9-_]+)\\.pos"
+      - name: JOURNALD_LOG_PATH_FLUENTD
+        value: "/var/log/splunkd-fluentd-journald-*.pos.json"
+      - name: JOURNALD_LOG_PATH_OTEL
+        value: "/var/lib/otel_pos/receiver_journald_"
+      - name: JOURNALD_LOG_CAPTURE_REGEX
+        value: "\\/splunkd\\-fluentd\\-journald\\-(?P<name>[\\w0-9-_]+)\\.pos\\.json"
+    volumeMounts:
+      - name: checkpoint
+        mountPath: {{ .Values.checkpointPath }}
+      - name: varlog
+        mountPath: /var/log
+      - name: varlibdockercontainers
+        mountPath: /var/lib/docker/containers
 containers:
   - name: otelcollector
     command:
