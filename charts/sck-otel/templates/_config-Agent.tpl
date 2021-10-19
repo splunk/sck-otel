@@ -328,15 +328,17 @@ processors:
     - key: com.splunk.index
       from_attribute: k8s.namespace.annotations.splunk.com/index
       action: upsert
-    - key: com.splunk.index
-      from_attribute: k8s.pod.annotations.splunk.com/index
-      action: upsert
     - key: service.name
       from_attribute: k8s.pod.name
       action: upsert
     - key: service.name
       from_attribute: k8s.pod.labels.app
       action: upsert
+  resource/splunk2:
+    attributes:
+      - key: com.splunk.index
+        from_attribute: k8s.pod.annotations.splunk.com/index
+        action: upsert
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
   resource/telemetry:
     # General resource attributes that apply to all telemetry passing through the agent.
@@ -486,6 +488,7 @@ service:
         - k8s_tagger
         {{- end }}
         - resource/splunk
+        - resource/splunk2
         - filter/namespacelogs
         - filter/podlogs
       exporters:
