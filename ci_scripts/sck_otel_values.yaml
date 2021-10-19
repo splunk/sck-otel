@@ -25,8 +25,7 @@ splunkPlatform:
   # HTTP timeout when sending data. Defaults to 10s.
   timeout: 10s
   # Whether to skip checking the certificate of the HEC endpoint when sending data over HTTPS. Defaults to true.
-  tls:
-    insecure_skip_verify: true
+  insecure_skip_verify: true
 
 # Metadata to be set on the telemetry data from Kubernetes objects.
 # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/k8sprocessor.
