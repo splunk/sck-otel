@@ -375,6 +375,22 @@ processors:
         key: deployment.environment
         value: "{{ .Values.environment }}"
   {{- end }}
+  filter/namespacelogs:
+    logs:
+      # any logs matching the namespace exclude annotation are excluded from remainder of pipeline
+      exclude:
+        match_type: strict
+        resource_attributes:
+          - key: k8s.namespace.annotations.splunk.com/exclude
+            value: "true"
+  filter/podlogs:
+    logs:
+      # any logs matching the pod exclude annotation are excluded from remainder of pipeline
+      exclude:
+        match_type: strict
+        resource_attributes:
+          - key: k8s.pod.annotations.splunk.com/exclude
+            value: "true"
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
 exporters:
   {{- if eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true" }}
@@ -470,6 +486,8 @@ service:
         - k8s_tagger
         {{- end }}
         - resource/splunk
+        - filter/namespacelogs
+        - filter/podlogs
       exporters:
         {{- if eq (include "splunk-otel-collector.sendLogsToSplunk" .) "true" }}
         - splunk_hec/platform

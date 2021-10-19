@@ -71,3 +71,9 @@ agent:
 
   podSecurityContext:
     runAsUser: 0
+    
+image:
+  repository: quay.io/signalfx/splunk-otel-collector
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
