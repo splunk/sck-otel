@@ -54,6 +54,9 @@ k8sMetadata:
     - key: app
       from: namespace
 
+containerLogs:
+  excludeAgentLogs: true
+  
 # List of key/value pairs to set additional metadata set uniformly across the collected telemetry.
 # Can be used to define things such as cloud_account_id, cloud_account_region, etc.
 # Should be set using https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/resourceprocessor.
