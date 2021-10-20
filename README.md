@@ -203,6 +203,8 @@ Process multiline logs by configuring `multilineSupportConfig` section in values
 
 [Example](https://github.com/splunk/sck-otel/blob/9bd92b9b2054b85eadfd744888cc19ebb46b0081/charts/sck-otel/values.yaml#L77)
 
+If you have a specific format you are using for formatting a python stack traces, you can take an example of your stack trace output and use https://regex101.com/  to find a golang regex that works for your format and specify it in the config file for the config option "first_entry_regex" and for the config option pass in the appropriate container name.
+
 ## Tweak Performance/resources used by Splunk Connect for Kubernetes-OpenTelemetry
 If you want to tweak performance/cpu and memory resources used by  Splunk Connect for Kubernetes-OpenTelemetry change the available cpu and memory for the Opentelemtry Agent by configuring resources:limits:cpu and resources:limits:memory in the values.yaml file used to deploy Splunk Connect for Kubernetes-OpenTelemetry.
 
