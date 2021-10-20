@@ -154,7 +154,7 @@ receivers:
       {{- toYaml .Values.customMetadata | nindent 6 }}
       {{- end }}
     max_concurrent_files: 1024
-    encoding: nop
+    encoding: utf-8
     fingerprint_size: 1kb
     max_log_size: 1MiB
     operators:
