@@ -380,8 +380,8 @@ processors:
         value: "{{ .Values.environment }}"
   {{- end }}
 
-  {{- if .Values.exclusiveFiltering.enabled }}
-  # If exclusive_filtering is enabled, only logs for pods with include annotation are ingested
+  {{- if .Values.containerLogs.useSplunkIncludeAnnotation }}
+  # If .Values.containerLogs.useSplunkIncludeAnnotation is set to true, only logs for pods with include annotation are ingested
   filter/include_pod_logs:
     logs:
       # any logs matching the pod include annotation are included and the rest are excluded from remainder of pipeline
@@ -505,7 +505,7 @@ service:
         {{- end }}
         - resource/splunk
         - resource/splunk2
-        {{- if .Values.exclusiveFiltering.enabled }}
+        {{- if .Values.containerLogs.useSplunkIncludeAnnotation }}
         - filter/include_pod_logs
         {{- else }}
         - filter/exclude_pod_logs

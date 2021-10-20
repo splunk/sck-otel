@@ -128,6 +128,9 @@ containerLogs:
   excludeAgentLogs: false
   # Extra operators for container logs. https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/README.md#what-operators-are-available
   extraOperators: []
+  # Set `splunk.com/include` annotation to true on pod and `containerLogs.useSplunkIncludeAnnotation` flag to `true` to include its logs from ingested to your Splunk platform deployment.
+  # All other logs will be ignored. You cant use this feature with the above mentioned exclude feature. You can only use either the include feature or the exclude feature.
+  useSplunkIncludeAnnotation: false
 
   # Multiline logs currently support only container name which is not unique within the cluster.
   # Can we also support k8s object owner name (deployment, daemonset, statefulset) along with namespace?
@@ -206,9 +209,6 @@ journaldLogs:
 
 # Persistent storage path for storing logs checkpoints
 checkpointPath: "/var/lib/otel_pos"
-
-exclusiveFiltering:
-  enabled: false
 
 # Configuration specific to OTel agent - a daemonset responsible for collecting telemetry data from each k8s node.
 agent:
