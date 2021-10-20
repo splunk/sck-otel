@@ -6,6 +6,55 @@ imagePullSecrets:
 serviceAccountName: {{ include "splunk-otel-collector.serviceAccountName" . }}
 securityContext:
   {{- toYaml .Values.agent.podSecurityContext | nindent 2 }}
+initContainers:
+  {{- if .Values.agent.initForNonRoot }}
+  - name: chown
+    image: registry.access.redhat.com/ubi8/ubi
+    command: ['sh', '-c', '
+    mkdir -p {{ .Values.checkpointPath }};
+    chown -Rv 20000:20000 {{ .Values.checkpointPath }};
+    chmod -v g+rwx {{ .Values.checkpointPath }};
+    {{ if .Values.containerLogs.enabled -}}
+    if [ -d "/var/lib/docker/containers" ];
+    then
+        chgrp -R 20000 /var/lib/docker/containers;
+        chmod -R g+rwx /var/lib/docker/containers;
+        setfacl -Rm d:g:20000:rwx,g:20000:rwx /var/lib/docker/containers;
+    fi;
+    if [ -d "/var/log/crio/pods" ];
+    then
+        chgrp -R 20000 /var/log/crio/pods;
+        chmod -R g+rwx /var/log/crio/pods;
+        setfacl -Rm d:g:20000:rwx,g:20000:rwx /var/log/crio/pods;
+    fi;
+    if [ -d "/var/log/pods" ];
+    then
+        chgrp -R 20000 /var/log/pods;
+        chmod -R g+rwx /var/log/pods;
+        setfacl -Rm d:g:20000:rwx,g:20000:rwx /var/log/pods;
+    fi;
+    {{- end }}
+    {{ if .Values.journaldLogs.enabled -}}
+    chgrp -R 20000 {{ .Values.journaldLogs.directory }};
+    chmod -R g+rwx {{ .Values.journaldLogs.directory }};
+    setfacl -Rm d:g:20000:rwx,g:20000:rwx {{ .Values.journaldLogs.directory }};
+    {{- end }}']
+    securityContext:
+      runAsUser: 0
+    volumeMounts:
+      - name: checkpoint
+        mountPath: {{ .Values.checkpointPath }}    
+      {{- if .Values.containerLogs.enabled }}
+      - name: varlog
+        mountPath: /var/log
+      - name: varlibdockercontainers
+        mountPath: /var/lib/docker/containers
+      {{- end }}
+      {{- if .Values.journaldLogs.enabled }}
+      - name: journalpath
+        mountPath: {{.Values.journaldLogs.directory }}
+      {{- end }}
+  {{- end }}
 containers:
   - name: otelcollector
     command:

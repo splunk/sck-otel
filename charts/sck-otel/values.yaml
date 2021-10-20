@@ -214,11 +214,14 @@ checkpointPath: "/var/lib/otel_pos"
 agent:
   enabled: true
 
-  podSecurityContext:
-    runAsUser: 10001
-    runAsGroup: 10001
-  securityContext: {}
+  # Boolean for running initContainer that will change group ownership of directories for container logs and journald logs. It is required for running the agent as a non root user.
+  # Disable it if you would rather run it as root user and set agent.securityContext.runAsUser to 0.
+  initForNonRoot: true
 
+  podSecurityContext: {}
+  securityContext:
+    runAsUser: 20000
+    runAsGroup: 20000
   # OTel agent extra daemonset annotations.
   annotations: {}
   # OTel agent extra pods annotations.
