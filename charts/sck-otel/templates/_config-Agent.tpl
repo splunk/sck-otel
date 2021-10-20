@@ -154,7 +154,7 @@ receivers:
       {{- toYaml .Values.customMetadata | nindent 6 }}
       {{- end }}
     max_concurrent_files: 1024
-    encoding: nop
+    encoding: utf-8
     fingerprint_size: 1kb
     max_log_size: 1MiB
     operators:
@@ -328,15 +328,17 @@ processors:
     - key: com.splunk.index
       from_attribute: k8s.namespace.annotations.splunk.com/index
       action: upsert
-    - key: com.splunk.index
-      from_attribute: k8s.pod.annotations.splunk.com/index
-      action: upsert
     - key: service.name
       from_attribute: k8s.pod.name
       action: upsert
     - key: service.name
       from_attribute: k8s.pod.labels.app
       action: upsert
+  resource/splunk2:
+    attributes:
+      - key: com.splunk.index
+        from_attribute: k8s.pod.annotations.splunk.com/index
+        action: upsert
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
   resource/telemetry:
     # General resource attributes that apply to all telemetry passing through the agent.
@@ -403,17 +405,18 @@ exporters:
     max_connections: {{ .Values.splunkPlatform.max_connections }}
     disable_compression: {{ .Values.splunkPlatform.disable_compression }}
     timeout: {{ .Values.splunkPlatform.timeout }}
-    insecure: {{ .Values.splunkPlatform.insecure }}
-    insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
-    {{- if .Values.splunkPlatform.clientCert }}
-    cert_file: /otel/etc/hec_client_cert
-    {{- end }}
-    {{- if .Values.splunkPlatform.clientKey  }}
-    key_file: /otel/etc/hec_client_key
-    {{- end }}
-    {{- if .Values.splunkPlatform.caFile }}
-    ca_file: /otel/etc/hec_ca_file
-    {{- end }}
+    tls:
+      insecure: {{ .Values.splunkPlatform.insecure }}
+      insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
+      {{- if .Values.splunkPlatform.clientCert }}
+      cert_file: /otel/etc/hec_client_cert
+      {{- end }}
+      {{- if .Values.splunkPlatform.clientKey  }}
+      key_file: /otel/etc/hec_client_key
+      {{- end }}
+      {{- if .Values.splunkPlatform.caFile }}
+      ca_file: /otel/etc/hec_ca_file
+      {{- end }}
   {{- if eq (include "splunk-otel-collector.sendMetricsToSplunk" .) "true" }}
   splunk_hec/platformMetrics:
     endpoint: {{ .Values.splunkPlatform.endpoint | quote }}
@@ -424,17 +427,18 @@ exporters:
     max_connections: {{ .Values.splunkPlatform.max_connections }}
     disable_compression: {{ .Values.splunkPlatform.disable_compression }}
     timeout: {{ .Values.splunkPlatform.timeout }}
-    insecure: {{ .Values.splunkPlatform.insecure }}
-    insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
-    {{- if .Values.splunkPlatform.clientCert }}
-    cert_file: /otel/etc/hec_client_cert
-    {{- end }}
-    {{- if .Values.splunkPlatform.clientKey  }}
-    key_file: /otel/etc/hec_client_key
-    {{- end }}
-    {{- if .Values.splunkPlatform.caFile }}
-    ca_file: /otel/etc/hec_ca_file
-    {{- end }}
+    tls:
+      insecure: {{ .Values.splunkPlatform.insecure }}
+      insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
+      {{- if .Values.splunkPlatform.clientCert }}
+      cert_file: /otel/etc/hec_client_cert
+      {{- end }}
+      {{- if .Values.splunkPlatform.clientKey  }}
+      key_file: /otel/etc/hec_client_key
+      {{- end }}
+      {{- if .Values.splunkPlatform.caFile }}
+      ca_file: /otel/etc/hec_ca_file
+      {{- end }}
   {{- end }}
   {{- end }}
   {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
@@ -484,6 +488,7 @@ service:
         - k8s_tagger
         {{- end }}
         - resource/splunk
+        - resource/splunk2
         - filter/namespacelogs
         - filter/podlogs
       exporters:

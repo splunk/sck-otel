@@ -112,7 +112,6 @@ def test_annotation_excluding(setup, container_name, expected):
     ("kube:container:kube-apiserver", 1),
     ("kube:container:etcd", 1),
     ("kube:container:kube-controller-manager", 1),
-    ("kube:container:otelcollector", 1),
     ("empty_sourcetype", 0)
 ])
 def test_sourcetype(setup, test_input, expected):
