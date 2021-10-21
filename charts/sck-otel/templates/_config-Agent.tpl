@@ -341,6 +341,11 @@ processors:
       - key: com.splunk.index
         from_attribute: k8s.pod.annotations.splunk.com/index
         action: upsert
+      {{- if .Values.splunkPlatform.sourcetype }}
+      - key: com.splunk.sourcetype
+        value: "{{.Values.splunkPlatform.sourcetype }}"
+        action: upsert
+      {{- end }}
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
   resource/telemetry:
     # General resource attributes that apply to all telemetry passing through the agent.
