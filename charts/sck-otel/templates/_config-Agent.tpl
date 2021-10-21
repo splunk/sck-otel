@@ -318,7 +318,6 @@ processors:
     filter:
       node_from_env_var: K8S_NODE_NAME
   {{- end }}
-  # TODO - when new image is released with source_key, sourtype_key, etc., update this processor and splunk hec exporter config
   resource/splunk:
     attributes:
     - key: host.name
@@ -341,6 +340,53 @@ processors:
       - key: com.splunk.index
         from_attribute: k8s.pod.annotations.splunk.com/index
         action: upsert
+  {{- if .Values.containerLogs.fieldNameConvention.renameFieldsSck }}
+  resource/sckcompatible:
+    attributes:
+    - key: container_name
+      from_attribute: k8s.container.name
+      action: upsert
+    - key: cluster_name
+      from_attribute: k8s.cluster.name
+      action: upsert
+    - key: container_id
+      from_attribute: k8s.container.id
+      action: upsert
+    - key: pod
+      from_attribute: k8s.pod.name
+      action: upsert
+    - key: pod_uid
+      from_attribute: k8s.pod.uid
+      action: upsert
+    - key: namespace
+      from_attribute: k8s.namespace.name
+      action: upsert
+    {{- range $_, $label := .Values.k8sMetadata.labels }}
+    - key: {{ printf "label_%s" $label.key }}
+      from_attribute: {{ printf "k8s.pod.labels.%s" $label.key }}
+      action: upsert
+    {{- end }}
+  {{- end }}
+  {{- if not .Values.containerLogs.fieldNameConvention.keepOtelContention }}
+  resource/removedups:
+    attributes:
+    - key: k8s.container.name
+      action: delete
+    - key: k8s.cluster.name
+      action: delete
+    - key: k8s.container.id
+      action: delete
+    - key: k8s.pod.name
+      action: delete
+    - key: k8s.pod.uid
+      action: delete
+    - key: k8s.namespace.name
+      action: delete
+    {{- range $_, $label := .Values.k8sMetadata.labels }}
+    - key: {{ printf "k8s.pod.labels.%s" $label.key }}
+      action: delete
+    {{- end }}
+  {{- end }}
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
   resource/telemetry:
     # General resource attributes that apply to all telemetry passing through the agent.
@@ -511,6 +557,14 @@ service:
         - filter/exclude_pod_logs
         - filter/exclude_namespace_logs
         {{- end }}
+        {{- if .Values.containerLogs.fieldNameConvention.renameFieldsSck }}
+        - resource/sckcompatible
+        {{- end }}
+        {{- if not .Values.containerLogs.fieldNameConvention.keepOtelContention }}
+        - resource/removedups
+        {{- end }}
+        - filter/namespacelogs
+        - filter/podlogs
       exporters:
         {{- if eq (include "splunk-otel-collector.sendLogsToSplunk" .) "true" }}
         - splunk_hec/platform
