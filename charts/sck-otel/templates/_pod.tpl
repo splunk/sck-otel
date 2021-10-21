@@ -17,19 +17,19 @@ initContainers:
     {{ if .Values.containerLogs.enabled -}}
     if [ -d "/var/lib/docker/containers" ];
     then
-        chgrp -R 20000 /var/lib/docker/containers;
+        chgrp -Rv 20000 /var/lib/docker/containers;
         chmod -R g+rwx /var/lib/docker/containers;
         setfacl -RLm d:g:20000:rwx,g:20000:rwx /var/lib/docker/containers;
     fi;
     if [ -d "/var/log/crio/pods" ];
     then
-        chgrp -R 20000 /var/log/crio/pods;
+        chgrp -Rv 20000 /var/log/crio/pods;
         chmod -R g+rwx /var/log/crio/pods;
         setfacl -RLm d:g:20000:rwx,g:20000:rwx /var/log/crio/pods;
     fi;
     if [ -d "/var/log/pods" ];
     then
-        chgrp -R 20000 /var/log/pods;
+        chgrp -Rv 20000 /var/log/pods;
         chmod -R g+rwx /var/log/pods;
         setfacl -RLm d:g:20000:rwx,g:20000:rwx /var/log/pods;
     fi;
