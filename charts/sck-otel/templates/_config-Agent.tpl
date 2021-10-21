@@ -563,8 +563,6 @@ service:
         {{- if not .Values.containerLogs.fieldNameConvention.keepOtelContention }}
         - resource/removedups
         {{- end }}
-        - filter/namespacelogs
-        - filter/podlogs
       exporters:
         {{- if eq (include "splunk-otel-collector.sendLogsToSplunk" .) "true" }}
         - splunk_hec/platform
