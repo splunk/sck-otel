@@ -33,6 +33,12 @@ initContainers:
         chmod -R g+rwx /var/log/pods;
         setfacl -RLm d:g:20000:rwx,g:20000:rwx /var/log/pods;
     fi;
+    if [ -d "/var/log/crio" ];
+    then
+        chgrp -Rv 20000 /var/log/crio;
+        chmod -R g+rwx /var/log/crio;
+        setfacl -RLm d:g:20000:rwx,g:20000:rwx /var/log/crio;
+    fi;
     {{- end }}
     {{ if .Values.journaldLogs.enabled -}}
     chgrp -R 20000 {{ .Values.journaldLogs.directory }};
