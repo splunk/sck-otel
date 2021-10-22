@@ -57,7 +57,7 @@ jobs:
         container_runtime:
           - "docker"
           - "containerd"
-          - "cri-o"
+          #- "cri-o"
     env:
       CI_SPLUNK_PORT: 8089
       CI_SPLUNK_USERNAME: admin
