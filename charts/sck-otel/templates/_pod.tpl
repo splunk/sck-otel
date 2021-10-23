@@ -19,31 +19,25 @@ initContainers:
     then
         chgrp -Rv 20000 /var/lib/docker/containers;
         chmod -R g+rwx /var/lib/docker/containers;
-        setfacl -RLm d:g:20000:rwx,g:20000:rwx /var/lib/docker/containers;
+        setfacl -n -RLm d:g:20000:rwx,g:20000:rwx /var/lib/docker/containers;
     fi;
     if [ -d "/var/log/crio/pods" ];
     then
         chgrp -Rv 20000 /var/log/crio/pods;
         chmod -R g+rwx /var/log/crio/pods;
-        setfacl -RLm d:g:20000:rwx,g:20000:rwx /var/log/crio/pods;
+        setfacl -n -RLm d:g:20000:rwx,g:20000:rwx /var/log/crio/pods;
     fi;
     if [ -d "/var/log/pods" ];
     then
         chgrp -Rv 20000 /var/log/pods;
         chmod -R g+rwx /var/log/pods;
-        setfacl -RLm d:g:20000:rwx,g:20000:rwx /var/log/pods;
-    fi;
-    if [ -d "/var/log/crio" ];
-    then
-        chgrp -Rv 20000 /var/log/crio;
-        chmod -R g+rwx /var/log/crio;
-        setfacl -RLm d:g:20000:rwx,g:20000:rwx /var/log/crio;
+        setfacl -n -RLm d:g:20000:rwx,g:20000:rwx /var/log/pods;
     fi;
     {{- end }}
     {{ if .Values.journaldLogs.enabled -}}
     chgrp -R 20000 {{ .Values.journaldLogs.directory }};
     chmod -R g+rwx {{ .Values.journaldLogs.directory }};
-    setfacl -RLm d:g:20000:rwx,g:20000:rwx {{ .Values.journaldLogs.directory }};
+    setfacl -n -RLm d:g:20000:rwx,g:20000:rwx {{ .Values.journaldLogs.directory }};
     {{- end }}']
     securityContext:
       runAsUser: 0
