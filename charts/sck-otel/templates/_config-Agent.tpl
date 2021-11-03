@@ -319,14 +319,16 @@ processors:
       node_from_env_var: K8S_NODE_NAME
   {{- end }}
   # TODO - when new image is released with source_key, sourtype_key, etc., update this processor and splunk hec exporter config
-  resource/splunk:
+  resource/splunk-precedence-order1:
     attributes:
     - key: host.name
       from_attribute: k8s.node.name
       action: upsert
+    {{- if .Values.splunkPlatform.sourcetype }}
     - key: com.splunk.sourcetype
-      from_attribute: k8s.pod.annotations.splunk.com/sourcetype
+      value: "{{.Values.splunkPlatform.sourcetype }}"
       action: upsert
+    {{- end }}
     - key: com.splunk.index
       from_attribute: k8s.namespace.annotations.splunk.com/index
       action: upsert
@@ -336,16 +338,15 @@ processors:
     - key: service.name
       from_attribute: k8s.pod.labels.app
       action: upsert
-  resource/splunk2:
+  resource/splunk-precedence-order2:
     attributes:
       - key: com.splunk.index
         from_attribute: k8s.pod.annotations.splunk.com/index
         action: upsert
-      {{- if .Values.splunkPlatform.sourcetype }}
       - key: com.splunk.sourcetype
-        value: "{{.Values.splunkPlatform.sourcetype }}"
+        from_attribute: k8s.pod.annotations.splunk.com/sourcetype
         action: upsert
-      {{- end }}
+
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
   resource/telemetry:
     # General resource attributes that apply to all telemetry passing through the agent.
@@ -508,8 +509,8 @@ service:
         {{- if .Values.k8sMetadata.enabled }}
         - k8s_tagger
         {{- end }}
-        - resource/splunk
-        - resource/splunk2
+        - resource/splunk-precedence-order1
+        - resource/splunk-precedence-order2
         {{- if .Values.containerLogs.useSplunkIncludeAnnotation }}
         - filter/include_pod_logs
         {{- else }}
