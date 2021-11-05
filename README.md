@@ -1,6 +1,6 @@
 # Splunk Connect for Kubernetes-OpenTelemetry
 
-> This project is currently in **BETA**.   We welcome your questions, feedback and contributions!  Please open an issue and ask a question, tell us what you think or about any problems you ran into.  The incremental features included in this repo will be folded into the [Splunk OpenTelemetry Connector](https://github.com/signalfx/splunk-otel-collector) and [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector) projects.  Your input is part of our efforts to make a better product.
+> This project is currently in **BETA**.   We welcome your questions, feedback and contributions!  Please open an issue and ask a question, tell us what you think or let us know about any issues.  The incremental features included in this repo will be in the [Splunk OpenTelemetry Connector](https://github.com/signalfx/splunk-otel-collector) and [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector) projects.  Your input is part of our efforts to create a better product.
 
 Splunk Connect for Kubernetes-OpenTelemetry provides a way to import and search your Kubernetes logging data in your Splunk platform deployment. Splunk Connect for Kubernetes-OpenTelemetry supports importing and searching your kubernetes logs on the following kubernetes distributions:
 
@@ -25,20 +25,20 @@ Splunk Inc. is a proud contributor to the Cloud Native Computing Foundation (CNC
 
 ## Setup Splunk
 
-Splunk Connect for Kubernetes-OpenTelemetry supports installation using Helm. Read the Prerequisites and Installation and Deployment documentation before you start your deployment of Splunk Connect for Kubernetes-OpenTelemetry.
+Splunk Connect for Kubernetes-OpenTelemetry supports installation using Helm. Read the Prerequisites, Installation and Deployment documentation before you start your deployment of Splunk Connect for Kubernetes-OpenTelemetry.
 
 Perform the following steps before you install:
 
-1. Create a minimum of one Splunk platform index. This index events index, which will handle logs.
+1. Create a minimum of one Splunk platform index. This indexes the events index, which will handle logs.
 If you do not configure this index, Splunk Connect for Kubernetes-OpenTelemetry uses the defaults created in your HTTP Event Collector (HEC) token.
 
 2. Create a HEC token if you do not already have one. If you are installing the connector on Splunk Cloud, file a ticket with Splunk Customer Service and they will deploy the indexes for your environment, and generate your HEC token.
 
 ## Setup for Non-Root User Group
 
-It is best practice to run pods as a non-root user. To avoid running collector pod as `root` user, perform below steps on each kubernetes nodes.
+It is best practice to run pods as a non-root user. To avoid running the collector pod as a `root` user, perform these steps on each of your kubernetes nodes.
 
-In this chart, it is set to run as as a user with UID and GID of `10001` ([set here](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml#L104)). But this user does not have the permission to read container log files typically owned by `root`. Below steps create a user with GID 10001 and grant access to that GID.
+In this chart, it is set to run as as a user with UID and GID of `10001` ([set here](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml#L104)). But this user does not have the permission to read container log files typically owned by `root`. These steps create a user with GID 10001 and grant access to that GID:
 
 ```bash
 # create a user otel with uid=10001 and gid=10001
@@ -81,7 +81,7 @@ fi
 
 ## Deploy with Helm 3.0+
 
-Helm, maintained by the CNCF, allows the Kubernetes administrator to install, upgrade, and manage the applications running in their Kubernetes clusters.  For more information on how to use and configure Helm Charts,  see the Helm [site](https://helm.sh/) and [repository](https://github.com/kubernetes/helm) for tutorials and product documentation. Helm is the only method that the Splunk software supports for installing Splunk Connect for Kubernetes.
+Helm, maintained by the CNCF, allows the Kubernetes administrator to install, upgrade, and manage the applications running in their Kubernetes clusters.  For more information on how to use and configure Helm Charts, see the Helm [site](https://helm.sh/) and [repository](https://github.com/kubernetes/helm) for tutorials and product documentation. Helm is the only method that the Splunk software supports for installing Splunk Connect for Kubernetes.
 
 To install and configure defaults with Helm:
 
@@ -96,7 +96,7 @@ helm repo add splunk-otel https://splunk.github.io/sck-otel/
 helm show values splunk-otel/sck-otel > values.yaml
 ```
 
-* Prepare this Values file. This file has a lot of documentation for configuring Splunk Connect for Kubernetes-OpenTelemetry. Look at this [example](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml). Once you have a Values file, you can simply install the chart with by running
+* Prepare this values.yaml file. This file has a lot of documentation for configuring Splunk Connect for Kubernetes-OpenTelemetry. Look at this [example](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml). Once you have a values.yaml file, you can simply install the chart with by running
 
 ```bash
 helm install my-splunk-connect -f my_values.yaml splunk-otel/sck-otel
@@ -109,15 +109,15 @@ To learn more about using and modifying charts, see:
 
 ## Configuration variables for Helm
 
-The default values file can be found here [default values file](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml)
+The default values.yaml file can be found here [default values file](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml)
 
 
 # Architecture
 
-Splunk Connect for Kubernetes-OpenTelemetry deploys a DaemonSet on each node. And in the DaemonSet, a OpenTelemetry container runs and does the collecting job. Splunk Connect for Kubernetes-OpenTelemetry uses the [node logging agent](https://kubernetes.io/docs/concepts/cluster-administration/logging/#using-a-node-logging-agent) method. See the [Kubernetes Logging Architecture](https://kubernetes.io/docs/concepts/cluster-administration/logging/) for an overview of the types of Kubernetes logs from which you may wish to collect data as well as information on how to set up those logs.
+Splunk Connect for Kubernetes-OpenTelemetry deploys a DaemonSet on each node. And in the DaemonSet, an OpenTelemetry container runs the collecting job. Splunk Connect for Kubernetes-OpenTelemetry uses the [node logging agent](https://kubernetes.io/docs/concepts/cluster-administration/logging/#using-a-node-logging-agent) method. See the [Kubernetes Logging Architecture](https://kubernetes.io/docs/concepts/cluster-administration/logging/) for an overview of the types of Kubernetes logs from which you can collect data, as well as information on how to set up those logs.
 Splunk Connect for Kubernetes-OpenTelemetry collects the following types of data:
 
-* Logs: Splunk Connect for Kubernetes-OpenTelemetry collects two types of logs:
+* Logs - Splunk Connect for Kubernetes-OpenTelemetry collects two types of logs:
   * Logs from Kubernetes system components (https://kubernetes.io/docs/concepts/overview/components/)
   * Applications (container) logs
 
@@ -140,9 +140,9 @@ To collect the data, Splunk Connect for Kubernetes-OpenTelemetry leverages OpenT
 
 # Performance of Splunk Connect for Kubernetes-OpenTelemetry
 
-Some configurations used with Splunk Connect for Kubernetes-OpenTelemetry can have an impact on overall performance of log ingestion. The more receivers, processors, exporters and extensions that are added to any of the pipelines, the greater the performance impact.
+Some configurations used with Splunk Connect for Kubernetes-OpenTelemetry can have an impact on the overall performance of log ingestion. The more receivers, processors, exporters and extensions added to any of the pipelines, the greater the performance impact.
 
-Splunk Connect for Kubernetes-OpenTelemetry can exceed the default throughput of HEC. To best address capacity needs, Splunk recommends that you monitor the HEC throughput and back pressure on Splunk Connect for Kubernetes-OpenTelemetry deployments and be prepared to add additional nodes as needed.
+Splunk Connect for Kubernetes-OpenTelemetry can exceed the default throughput of HEC. To best address your need for more capacity, Splunk recommends that you monitor the HEC throughput and back pressure on Splunk Connect for Kubernetes-OpenTelemetry deployments and be prepared to add additional nodes as needed.
 
 Here is the summary of performance benchmarks run internally.
 | Log Generator Count | Total Generated EPS | Event Size (byte) | Agent CPU Usage | Agent EPS |
@@ -162,25 +162,25 @@ Here is the summary of performance benchmarks run internally.
 # Manage Splunk Connect for Kubernetes-OpenTelemetry Log Ingestion by Using Annotations
 
 Manage Splunk Connect for Kubernetes-OpenTelemetry Logging with these supported annotations.
-* Use `splunk.com/index` annotation on pod and/or namespace to tell which Splunk platform indexes to ingest to. Pod annotation will take precedence over namespace annotation when both are annotated.
+* Use `splunk.com/index` annotation on pod and/or namespace to specify which Splunk platform indexes to ingest to. Pod annotation will take precedence over namespace annotation when both are annotated.
   ex) `kubectl annotate namespace kube-system splunk.com/index=k8s_events`
-* Use `splunk.com/sourcetype` annotation on pod to overwrite `sourcetype` field. If not set, it is dynamically generated to be `kube:container:CONTAINER_NAME` where CONTAINER_NAME is the container name of the container running in the pod.
-* Set `splunk.com/exclude` annotation to true on pod and/or namespace to exclude its logs from ingested to your Splunk platform deployment.
-* Set `splunk.com/include` annotation to true on pod and `containerLogs.useSplunkIncludeAnnotation` flag to `true` to include its logs from ingested to your Splunk platform deployment.
-  All other logs will be ignored. You cant use this feature with the above mentioned exclude feature. You can only use either the include feature or the exclude feature.
+* Use `splunk.com/sourcetype` annotation on the pod to overwrite the `sourcetype` field. If not set, it is dynamically generated to be `kube:container:CONTAINER_NAME` where CONTAINER_NAME is the container name of the container running in the pod.
+* Set `splunk.com/exclude` annotation to true on the pod and/or namespace to exclude its logs from ingested to your Splunk platform deployment.
+* Set `splunk.com/include` annotation to true on the pod and the `containerLogs.useSplunkIncludeAnnotation` flag to `true` to include its logs from ingested to your Splunk platform deployment.
+  All other logs will be ignored. You can't use the include feature with the exclude feature. You can only use either the include feature or the exclude feature.
 
 # Search for Splunk Connect for Kubernetes-OpenTelemetry metadata in Splunk
-Splunk Connect for Kubernetes-OpenTelemetry sends events to Splunk which can contain extra meta-data attached to each event. Metadata values such as "k8s.pod.name", "k8s.pod.uid", "k8s.deployment.name","k8s.cluster.name", "k8s.namespace.name", "k8s.node.name", "k8s.pod.start_time", "container_name", "run_id" and "stream" will appear as fields when viewing the event data inside Splunk.
-There are two solutions for running searches in Splunk on meta-data.
+Splunk Connect for Kubernetes-OpenTelemetry sends events to Splunk which can contain extra metadata attached to each event. Metadata values such as "k8s.pod.name", "k8s.pod.uid", "k8s.deployment.name","k8s.cluster.name", "k8s.namespace.name", "k8s.node.name", "k8s.pod.start_time", "container_name", "run_id" and "stream" will appear as fields when viewing the event data inside Splunk.
+There are two solutions for running searches in Splunk on metadata.
 
 * Modify search to use`fieldname::value` instead of `fieldname=value`.
-* Configure `fields.conf` on your downstream Splunk system to have your meta-data fields available to be searched using `fieldname=value`. Example: [fields.conf.example](https://github.com/splunk/sck-otel/blob/main/example/fields.conf.example)
+* Configure `fields.conf` on your downstream Splunk system to have your metadata fields searchable using `fieldname=value`. Example: [fields.conf.example](https://github.com/splunk/sck-otel/blob/main/example/fields.conf.example)
 
-For more information on index time field extraction please view this [guide](https://docs.splunk.com/Documentation/Splunk/latest/Data/Configureindex-timefieldextraction#Where_to_put_the_configuration_changes_in_a_distributed_environment).
+For more information on index time field extraction, see this [guide](https://docs.splunk.com/Documentation/Splunk/latest/Data/Configureindex-timefieldextraction#Where_to_put_the_configuration_changes_in_a_distributed_environment).
 
 # Advanced Configurations for Splunk Connect for Kubernetes-OpenTelemetry
 
-## Add logs from different Kubernetes distributions and container runtimes like(docker, cri-o, containerd)
+## Add logs from different Kubernetes distributions and container runtimes (docker, cri-o, containerd)
 
 Select the proper container runtime for your Kubernetes distribution.
 
@@ -193,7 +193,7 @@ You can add additional log files to be ingested from Kubernetes host machines an
 [Example](https://github.com/splunk/sck-otel/blob/main/example/values/extraHostFileValues.yaml#L102)
 
 ## Override underlying OpenTelemetry Agent configuration
-If you want to use your own OpenTelemetry Agent configuration, you can build a [OpenTelemetry Agent config](https://github.com/splunk/sck-otel/blob/main/example/manifests/otel_config.yaml) and override our default config by configuring configOverride in the values.yaml file used to deploy Splunk Connect for Kubernetes-OpenTelemetry.
+If you want to use your own OpenTelemetry Agent configuration, you can build a [OpenTelemetry Agent config](https://github.com/splunk/sck-otel/blob/main/example/manifests/otel_config.yaml) and override our default config by using configOverride in the values.yaml file used to deploy Splunk Connect for Kubernetes-OpenTelemetry.
 
 ## Adding Audit logs from Kubernetes host machines
 You can ingest audit logs from your Kubernetes cluster by configuring extraHostPathMounts and extraHostFileConfig in the values.yaml file used to deploy Splunk Connect for Kubernetes-OpenTelemetry.
@@ -201,28 +201,28 @@ You can ingest audit logs from your Kubernetes cluster by configuring extraHostP
 [Example](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml#L122)
 
 ## Processing Multi-Line Logs
-Splunk Connect for Kubernetes-OpenTelmetry supports parsing of multiline logs to help read, understand and troubleshoot the multiline logs in a better way.
+Splunk Connect for Kubernetes-OpenTelmetry supports parsing of multiline logs to help read, understand and troubleshoot multiline logs more effectively.
 Process multiline logs by configuring `multilineSupportConfig` section in values.yaml.
 
 [Example](https://github.com/splunk/sck-otel/blob/9bd92b9b2054b85eadfd744888cc19ebb46b0081/charts/sck-otel/values.yaml#L77)
 
-If you have a specific format you are using for formatting a python stack traces, you can take an example of your stack trace output and use https://regex101.com/  to find a golang regex that works for your format and specify it in the config file for the config option "first_entry_regex" and for the config option pass in the appropriate container name.
+If you have a specific format you are using for formatting python stack traces, you can take an example of your stack trace output and use https://regex101.com/  to find a golang regex in the appropriate format and specify it in the config file for the "first_entry_regex" config option, and pass in the appropriate container name for the config option.
 
 ## Tweak Performance/resources used by Splunk Connect for Kubernetes-OpenTelemetry
-If you want to tweak performance/cpu and memory resources used by  Splunk Connect for Kubernetes-OpenTelemetry change the available cpu and memory for the Opentelemtry Agent by configuring resources:limits:cpu and resources:limits:memory in the values.yaml file used to deploy Splunk Connect for Kubernetes-OpenTelemetry.
+If you want to tweak performance/cpu and memory resources used by Splunk Connect for Kubernetes-OpenTelemetry, change the available cpu and memory for the Opentelemtry Agent by configuring resources:limits:cpu and resources:limits:memory in the values.yaml file used to deploy Splunk Connect for Kubernetes-OpenTelemetry.
 
 [Example](https://github.com/splunk/sck-otel/blob/main/charts/sck-otel/values.yaml#L143)
 
 # Maintenance And Support
-Splunk Connect for Kubernetes-OpenTelemetry is supported through Splunk Support assuming the customer has a current Splunk support entitlement ([Splunk Support](https://www.splunk.com/en_us/about-splunk/contact-us.html#tabs/tab_parsys_tabs_CustomerSupport_4)). For customers that do not have a current Splunk support entitlement, please search [open and closed issues](https://github.com/splunk/sck-otel/issues?q=is%3Aissue) and create a new issue if not already there.
+Splunk Connect for Kubernetes-OpenTelemetry is supported through Splunk Support with current Splunk support entitlement ([Splunk Support](https://www.splunk.com/en_us/about-splunk/contact-us.html#tabs/tab_parsys_tabs_CustomerSupport_4)). For customers that do not have a current Splunk support entitlement, please search [open and closed issues](https://github.com/splunk/sck-otel/issues?q=is%3Aissue) and create a new issue if it does not already exist.
 The current maintainers of this project are the DataEdge team at Splunk.
 
 # Contributing
-We welcome feedback and contributions from the community! Please see our ([contribution guidelines](https://github.com/splunk/sck-otel/blob/main/CONTRIBUTING.md)) for more information on how to get involved. PR contributions require acceptance of both the code of conduct and the contributor license agreement.
+We welcome feedback and contributions from the community! See our ([contribution guidelines](https://github.com/splunk/sck-otel/blob/main/CONTRIBUTING.md)) for more information on how to get involved. PR contributions require acceptance of both the code of conduct and the contributor license agreement.
 
 # Upgrading
 ## v0.2.x -> v0.3.0
-If using `.Values.configOverride` and have expressions that refer log record, double up `$` characters for those expressions. [Expressions](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/types/expression.md)
+If you're using `.Values.configOverride` and have expressions that refer to log record, double up `$` characters for those expressions. [Expressions](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/types/expression.md)
 
 # License
 
